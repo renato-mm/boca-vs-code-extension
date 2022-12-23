@@ -5,6 +5,13 @@ import { ProblemProvider, Problem } from './problem';
 import { RunProvider, Run } from './run';
 
 export function activate(context: vscode.ExtensionContext) {
+	// Overwrite entire parent setting
+	vscode.workspace.getConfiguration().update(
+		'explorer.decorations.colors',
+		false,
+		vscode.ConfigurationTarget.Global
+	);
+
 	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
 		? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
 
