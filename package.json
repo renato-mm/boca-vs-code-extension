@@ -15,6 +15,66 @@
     "Other"
   ],
   "main": "./out/extension.js",
+  "contributes": {
+    "colors": [
+      {
+        "id": "runs.correctAnswer",
+        "description": "Color for a correct run",
+        "defaults": {
+          "dark": "terminal.ansiBrightGreen",
+          "light": "terminal.ansiGreen"
+        }
+      },
+      {
+        "id": "runs.incorrectAnswer",
+        "description": "Color for a incorrect run",
+        "defaults": {
+          "dark": "terminal.ansiBrightRed",
+          "light": "terminal.ansiRed"
+        }
+      },
+      {
+        "id": "problems.blue",
+        "description": "Color for blue balloon problem",
+        "defaults": {
+          "dark": "#A8E7F0",
+          "light": "#A8E7F0"
+        }
+      },
+      {
+        "id": "problems.orange",
+        "description": "Color for orange balloon problem",
+        "defaults": {
+          "dark": "#F4D199",
+          "light": "#F4D199"
+        }
+      },
+      {
+        "id": "problems.green",
+        "description": "Color for green balloon problem",
+        "defaults": {
+          "dark": "#C6EC87",
+          "light": "#C6EC87"
+        }
+      },
+      {
+        "id": "problems.red",
+        "description": "Color for red balloon problem",
+        "defaults": {
+          "dark": "#FE7269",
+          "light": "#FE7269"
+        }
+      },
+      {
+        "id": "problems.pink",
+        "description": "Color for pink balloon problem",
+        "defaults": {
+          "dark": "#FEBAE7",
+          "light": "#FEBAE7"
+        }
+      }
+    ]
+  },
   "scripts": {
     "vscode:prepublish": "npm run compile",
     "compile": "tsc -p ./",
