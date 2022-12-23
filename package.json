@@ -41,6 +41,12 @@
           "name": "Problems",
           "icon": "media/mortar-board.svg",
           "contextualTitle": "BOCA"
+        },
+        {
+          "id": "runs",
+          "name": "Runs",
+          "icon": "media/mortar-board.svg",
+          "contextualTitle": "BOCA"
         }
       ]
     },
