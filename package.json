@@ -15,7 +15,7 @@
     "Other"
   ],
   "activationEvents": [
-    "onView:contests",
+    "onView:contests"
   ],
   "main": "./out/extension.js",
   "contributes": {
@@ -36,6 +36,12 @@
           "icon": "media/mortar-board.svg",
           "contextualTitle": "BOCA"
         },
+        {
+          "id": "problems",
+          "name": "Problems",
+          "icon": "media/mortar-board.svg",
+          "contextualTitle": "BOCA"
+        }
       ]
     },
     "commands": [
@@ -75,6 +81,18 @@
         "command": "contests.selectContest",
         "title": "Select Contest"
       },
+      {
+        "command": "problems.selectProblem",
+        "title": "Select Problem"
+      },
+      {
+        "command": "problems.downloadProblem",
+        "title": "Download Problem To Workspace",
+        "icon": {
+          "light": "resources/light/desktop-download.svg",
+          "dark": "resources/dark/desktop-download.svg"
+        }
+      }
     ],
     "menus": {
       "view/context": [
@@ -108,6 +126,15 @@
           "command": "contests.deleteEntry",
           "when": "view == contests && viewItem == contest"
         },
+        {
+          "command": "problems.downloadProblem",
+          "when": "view == problems && viewItem == problem",
+          "group": "inline"
+        },
+        {
+          "command": "problems.downloadProblem",
+          "when": "view == problems && viewItem == problem"
+        }
       ]
     },
     "colors": [

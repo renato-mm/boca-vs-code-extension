@@ -1,6 +1,7 @@
 import * as vscode from 'vscode';
 
 import { ContestProvider, Contest } from './contest';
+import { ProblemProvider, Problem } from './problem';
 
 export function activate(context: vscode.ExtensionContext) {
 	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
@@ -13,6 +14,16 @@ export function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('contests.addEntry', () => vscode.window.showInformationMessage(`Successfully called add entry.`));
 	vscode.commands.registerCommand('contests.editEntry', (contest: Contest) => vscode.window.showInformationMessage(`Successfully called edit entry on ${contest.label}.`));
 	vscode.commands.registerCommand('contests.deleteEntry', (contest: Contest) => vscode.window.showInformationMessage(`Successfully called delete entry on ${contest.label}.`));
+
+	const problemProvider = new ProblemProvider(rootPath);
+	vscode.window.registerTreeDataProvider('problems', problemProvider);
+
+	vscode.commands.registerCommand('contests.selectContest', contestNumber => {
+		problemProvider.refresh(contestNumber);
+	});
+	vscode.commands.registerCommand('problems.downloadProblem', (problem: Problem) => {
+		problemProvider.downloadProblemToWorkspace(problem);
+	});
 }
 
 export function deactivate() {}
