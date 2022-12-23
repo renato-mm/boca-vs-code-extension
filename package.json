@@ -16,6 +16,15 @@
   ],
   "main": "./out/extension.js",
   "contributes": {
+    "viewsContainers": {
+      "activitybar": [
+        {
+          "id": "boca-file-explorer",
+          "title": "BOCA",
+          "icon": "media/mortar-board.svg"
+        }
+      ]
+    },
     "colors": [
       {
         "id": "runs.correctAnswer",
