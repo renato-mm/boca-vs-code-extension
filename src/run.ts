@@ -9,7 +9,7 @@ export class RunProvider implements vscode.TreeDataProvider<Run> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Run | undefined | void> = new vscode.EventEmitter<Run | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Run | undefined | void> = this._onDidChangeTreeData.event;
 
-	constructor(private workspaceRoot: string | undefined) {
+	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
 	}
 
 	refresh(problemNumber: number): void {
@@ -35,10 +35,14 @@ export class RunProvider implements vscode.TreeDataProvider<Run> {
 			return [];
 		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios({
 				method: 'get',
 				url: apiPath + '/problem/' + this._problemNumber + '/run',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
 			});
 			return (response.data || [])
 				.filter((run: any) => run.usernumber === 3151)

@@ -23,7 +23,7 @@ class TreeFileDecorationProvider implements FileDecorationProvider {
 	updateProblemDecorator(resourceUri: Uri, solved: boolean, color: string): void {
 		const decorator: FileDecoration = {
 			badge: solved ? '⚑' : '⚐',
-			color: new ThemeColor(`problems.${color}`)
+			color: new ThemeColor(`bocaExplorer.${color}`)
 		};
 		const currrentDecorator = this._fileDecorations.get(resourceUri.toString());
 		if (currrentDecorator?.badge !== decorator.badge) {

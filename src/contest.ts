@@ -7,7 +7,7 @@ export class ContestProvider implements vscode.TreeDataProvider<Contest> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Contest | undefined | void> = new vscode.EventEmitter<Contest | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Contest | undefined | void> = this._onDidChangeTreeData.event;
 
-	constructor(private workspaceRoot: string | undefined) {
+	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
 	}
 
 	refresh(): void {
@@ -29,13 +29,20 @@ export class ContestProvider implements vscode.TreeDataProvider<Contest> {
 
 	private async _getContests(): Promise<Contest[]> {
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios({
 				method: 'get',
 				url: apiPath + '/contest',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
 			});
 			return (response.data || []).filter((contest: any) => contest.contestnumber !== 0).map((contest: any) => this._toContest(contest));
 		} catch (error: any) {
+			if (error.response.status === 401) {
+				return vscode.commands.executeCommand('setContext', 'boca.showSignInView', true);
+			}
 			vscode.window.showErrorMessage('Fetching contests failed');
 			console.error(error);
 			return [];
@@ -44,7 +51,7 @@ export class ContestProvider implements vscode.TreeDataProvider<Contest> {
 
 	private _toContest(contest: any) {
 		return new Contest(contest.contestname, '', vscode.TreeItemCollapsibleState.None, {
-			command: 'contests.selectContest',
+			command: 'bocaExplorer.selectContest',
 			title: 'Select Contest',
 			arguments: [contest.contestnumber]
 		});

@@ -25,31 +25,30 @@
         }
       ]
     },
+    "viewsWelcome": [
+      {
+        "view": "bocaExplorer",
+        "contents": "You have to sign in to use this extension.\n[Sign In](command:bocaExplorer.signIn)",
+        "when": "boca.showSignInView"
+      }
+    ],
     "views": {
       "boca-file-explorer": [
         {
-          "id": "contests",
-          "name": "Contests",
-          "icon": "media/mortar-board.svg",
-          "contextualTitle": "BOCA"
-        },
-        {
-          "id": "problems",
-          "name": "Problems",
-          "icon": "media/mortar-board.svg",
+          "id": "bocaExplorer",
+          "name": "Boca Explorer",
           "contextualTitle": "BOCA"
         },
         {
           "id": "runs",
           "name": "Runs",
-          "icon": "media/mortar-board.svg",
           "contextualTitle": "BOCA"
         }
       ]
     },
     "commands": [
       {
-        "command": "contests.fetchContests",
+        "command": "bocaExplorer.fetchContests",
         "title": "Fetch Contests",
         "icon": {
           "light": "resources/light/sync.svg",
@@ -57,7 +56,7 @@
         }
       },
       {
-        "command": "contests.refreshEntry",
+        "command": "bocaExplorer.refreshEntry",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -65,11 +64,11 @@
         }
       },
       {
-        "command": "contests.addEntry",
+        "command": "bocaExplorer.addEntry",
         "title": "Add"
       },
       {
-        "command": "contests.editEntry",
+        "command": "bocaExplorer.editEntry",
         "title": "Edit",
         "icon": {
           "light": "resources/light/edit.svg",
@@ -77,19 +76,19 @@
         }
       },
       {
-        "command": "contests.deleteEntry",
+        "command": "bocaExplorer.deleteEntry",
         "title": "Delete"
       },
       {
-        "command": "contests.selectContest",
+        "command": "bocaExplorer.selectContest",
         "title": "Select Contest"
       },
       {
-        "command": "problems.selectProblem",
+        "command": "bocaExplorer.selectProblem",
         "title": "Select Problem"
       },
       {
-        "command": "problems.downloadProblem",
+        "command": "bocaExplorer.downloadProblem",
         "title": "Download Problem To Workspace",
         "icon": {
           "light": "resources/light/desktop-download.svg",
@@ -100,43 +99,43 @@
     "menus": {
       "view/context": [
         {
-          "command": "contests.refreshEntry",
-          "when": "view == contests"
+          "command": "bocaExplorer.refreshEntry",
+          "when": "view == bocaExplorer"
         },
         {
-          "command": "contests.addEntry",
-          "when": "view == contests"
+          "command": "bocaExplorer.addEntry",
+          "when": "view == bocaExplorer"
         }
       ],
       "view/title": [
         {
-          "command": "contests.refreshEntry",
-          "when": "view == contests",
+          "command": "bocaExplorer.refreshEntry",
+          "when": "view == bocaExplorer",
           "group": "navigation"
         },
         {
-          "command": "contests.addEntry",
-          "when": "view == contests"
+          "command": "bocaExplorer.addEntry",
+          "when": "view == bocaExplorer"
         }
       ],
       "view/item/context": [
         {
-          "command": "contests.editEntry",
-          "when": "view == contests && viewItem == contest",
+          "command": "bocaExplorer.editEntry",
+          "when": "view == bocaExplorer && viewItem == contest",
           "group": "inline"
         },
         {
-          "command": "contests.deleteEntry",
-          "when": "view == contests && viewItem == contest"
+          "command": "bocaExplorer.deleteEntry",
+          "when": "view == bocaExplorer && viewItem == contest"
         },
         {
-          "command": "problems.downloadProblem",
-          "when": "view == problems && viewItem == problem",
+          "command": "bocaExplorer.downloadProblem",
+          "when": "view == bocaExplorer && viewItem == problem",
           "group": "inline"
         },
         {
-          "command": "problems.downloadProblem",
-          "when": "view == problems && viewItem == problem"
+          "command": "bocaExplorer.downloadProblem",
+          "when": "view == bocaExplorer && viewItem == problem"
         }
       ]
     },
@@ -158,7 +157,7 @@
         }
       },
       {
-        "id": "problems.blue",
+        "id": "bocaExplorer.blue",
         "description": "Color for blue balloon problem",
         "defaults": {
           "dark": "#A8E7F0",
@@ -166,7 +165,7 @@
         }
       },
       {
-        "id": "problems.orange",
+        "id": "bocaExplorer.orange",
         "description": "Color for orange balloon problem",
         "defaults": {
           "dark": "#F4D199",
@@ -174,7 +173,7 @@
         }
       },
       {
-        "id": "problems.green",
+        "id": "bocaExplorer.green",
         "description": "Color for green balloon problem",
         "defaults": {
           "dark": "#C6EC87",
@@ -182,7 +181,7 @@
         }
       },
       {
-        "id": "problems.red",
+        "id": "bocaExplorer.red",
         "description": "Color for red balloon problem",
         "defaults": {
           "dark": "#FE7269",
@@ -190,7 +189,7 @@
         }
       },
       {
-        "id": "problems.pink",
+        "id": "bocaExplorer.pink",
         "description": "Color for pink balloon problem",
         "defaults": {
           "dark": "#FEBAE7",

@@ -10,7 +10,7 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 	private _onDidChangeTreeData: vscode.EventEmitter<Problem | undefined | void> = new vscode.EventEmitter<Problem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Problem | undefined | void> = this._onDidChangeTreeData.event;
 
-	constructor(private workspaceRoot: string | undefined) {
+	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
 	}
 
 	refresh(contestNumber: number): void {
@@ -20,11 +20,15 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 
 	async downloadProblemToWorkspace(problem: Problem): Promise<void> {
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios({
 				method: 'get',
 				url: apiPath + '/problem/' + problem.problemNumber + '/file',
-				responseType: 'arraybuffer'
+				responseType: 'arraybuffer',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
 			});
 			await extract(response.data, { dir: (this.workspaceRoot || '.') });
 		} catch (error) {
@@ -48,10 +52,14 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 
 	private async _getProblems(): Promise<Problem[]> {
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios({
 				method: 'get',
 				url: apiPath + '/contest/' + this._contestNumber + '/problem',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
 			});
 			return (response.data || []).filter((problem: any) => !problem.fake).map((problem: any) => this._toProblem(problem));
 		} catch (error) {
@@ -71,7 +79,7 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 			problem.problemcolorname,
 			vscode.TreeItemCollapsibleState.None,
 			{
-				command: 'problems.selectProblem',
+				command: 'bocaExplorer.selectProblem',
 				title: 'Select Problem',
 				arguments: [problem.problemnumber]
 			}
