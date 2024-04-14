@@ -34,18 +34,18 @@ export class RunProvider implements vscode.TreeDataProvider<Run> {
 		if (this._problemNumber === 0) {
 			return [];
 		}
-		const apiAddress = process.env.apiAddress;
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		try {
 			const response = await axios({
 				method: 'get',
-				url: apiAddress + '/problem/' + this._problemNumber + '/run',
+				url: apiPath + '/problem/' + this._problemNumber + '/run',
 			});
 			return (response.data || [])
 				.filter((run: any) => run.usernumber === 3151)
 				.sort((r1: any, r2: any) => r1.rundate - r2.rundate)
 				.map((run: any) => this._toRun(run));
 		} catch (error) {
-			vscode.window.showErrorMessage('Fecthing runs failed');
+			vscode.window.showErrorMessage('Fetching runs failed');
 			console.error(error);
 			return [];
 		}

@@ -14,9 +14,6 @@
   "categories": [
     "Other"
   ],
-  "activationEvents": [
-    "onView:contests"
-  ],
   "main": "./out/extension.js",
   "contributes": {
     "viewsContainers": {
@@ -200,7 +197,23 @@
           "light": "#FEBAE7"
         }
       }
-    ]
+    ],
+    "configuration": {
+      "title": "BOCA",
+      "properties": {
+        "boca.api.path": {
+          "type": "string",
+          "default": "",
+          "format": "uri",
+          "description": "Path of the BOCA api."
+        },
+        "boca.api.salt": {
+          "type": "string",
+          "default": "",
+          "description": "Salt used by the BOCA api."
+        }
+      }
+    }
   },
   "scripts": {
     "vscode:prepublish": "npm run compile",

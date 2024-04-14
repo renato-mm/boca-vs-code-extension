@@ -28,15 +28,15 @@ export class ContestProvider implements vscode.TreeDataProvider<Contest> {
 	}
 
 	private async _getContests(): Promise<Contest[]> {
-		const apiAddress = process.env.apiAddress;
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		try {
 			const response = await axios({
 				method: 'get',
-				url: apiAddress + '/contests',
+				url: apiPath + '/contest',
 			});
 			return (response.data || []).filter((contest: any) => contest.contestnumber !== 0).map((contest: any) => this._toContest(contest));
-		} catch (error) {
-			vscode.window.showErrorMessage('Fecthing contests failed');
+		} catch (error: any) {
+			vscode.window.showErrorMessage('Fetching contests failed');
 			console.error(error);
 			return [];
 		}

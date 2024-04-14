@@ -19,11 +19,11 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 	}
 
 	async downloadProblemToWorkspace(problem: Problem): Promise<void> {
-		const apiAddress = process.env.apiAddress;
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		try {
 			const response = await axios({
 				method: 'get',
-				url: apiAddress + '/problem/' + problem.problemNumber + '/file',
+				url: apiPath + '/problem/' + problem.problemNumber + '/file',
 				responseType: 'arraybuffer'
 			});
 			await extract(response.data, { dir: (this.workspaceRoot || '.') });
@@ -47,15 +47,15 @@ export class ProblemProvider implements vscode.TreeDataProvider<Problem> {
 	}
 
 	private async _getProblems(): Promise<Problem[]> {
-		const apiAddress = process.env.apiAddress;
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		try {
 			const response = await axios({
 				method: 'get',
-				url: apiAddress + '/contest/' + this._contestNumber + '/problem',
+				url: apiPath + '/contest/' + this._contestNumber + '/problem',
 			});
 			return (response.data || []).filter((problem: any) => !problem.fake).map((problem: any) => this._toProblem(problem));
 		} catch (error) {
-			vscode.window.showErrorMessage('Fecthing contests failed');
+			vscode.window.showErrorMessage('Fetching problems failed');
 			console.error(error);
 			return [];
 		}
