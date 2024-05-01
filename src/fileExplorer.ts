@@ -287,10 +287,15 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		const workspaceFolder = (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')[0];
 		if (workspaceFolder) {
 			const contests = await this._getContests();
-			const children = await this.readDirectory(workspaceFolder.uri);
+			const currentChildren = await this.readDirectory(workspaceFolder.uri);
+			const children: [string, vscode.FileType][] = [];
 			for (let contest of contests) {
 				const dirname = `${contest.contestnumber}-${contest.contestname}`;
-				if (!children.find(child => child[0] === dirname)) {
+				const currentChild = currentChildren.find(child => child[0] === dirname);
+				if (currentChild) {
+					children.push(currentChild);
+				}
+				else {
 					const uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, dirname));
 					await this.createDirectory(uri);
 					this._getProblems(contest.contestnumber).then(problems => {
