@@ -30,19 +30,37 @@
         "view": "bocaExplorer",
         "contents": "You have to sign in to use this extension.\n[Sign In](command:bocaExplorer.signIn)",
         "when": "boca.showSignInView"
+      },
+      {
+        "view": "settings",
+        "contents": "You have to add an API path configuration.\n[Open this configuration](command:bocaExplorer.openApiPathSetting)",
+        "when": "!config.boca.api.path"
+      },
+      {
+        "view": "settings",
+        "contents": "You have to add an API salt configuration.\n[Open this configuration](command:bocaExplorer.openApiSaltSetting)",
+        "when": "!config.boca.api.salt"
       }
     ],
     "views": {
       "boca-file-explorer": [
         {
+          "id": "settings",
+          "name": "Settings",
+          "contextualTitle": "BOCA",
+          "when": "!config.boca.api.path || !config.boca.api.salt"
+        },
+        {
           "id": "bocaExplorer",
           "name": "Boca Explorer",
-          "contextualTitle": "BOCA"
+          "contextualTitle": "BOCA",
+          "when": "config.boca.api.path && config.boca.api.salt"
         },
         {
           "id": "runs",
           "name": "Runs",
-          "contextualTitle": "BOCA"
+          "contextualTitle": "BOCA",
+          "when": "config.boca.api.path && config.boca.api.salt"
         }
       ]
     },

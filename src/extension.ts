@@ -6,6 +6,14 @@ import { RunProvider, Run } from './run';
 import { AuthProvider } from './auth';
 
 export async function activate(context: vscode.ExtensionContext) {
+	vscode.commands.registerCommand(
+		'bocaExplorer.openApiPathSetting',
+		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.path')
+	);
+	vscode.commands.registerCommand(
+		'bocaExplorer.openApiSaltSetting',
+		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.salt')
+	);
 	// Overwrite entire parent setting
 	vscode.workspace.getConfiguration().update(
 		'explorer.decorations.colors',
