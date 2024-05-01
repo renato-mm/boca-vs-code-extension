@@ -65,14 +65,10 @@
       ]
     },
     "commands": [
-      {
-        "command": "bocaExplorer.fetchContests",
-        "title": "Fetch Contests",
-        "icon": {
-          "light": "resources/light/sync.svg",
-          "dark": "resources/dark/sync.svg"
-        }
-      },
+			{
+				"command": "bocaExplorer.openFile",
+				"title": "Open File"
+			},
       {
         "command": "bocaExplorer.refreshEntry",
         "title": "Refresh",
@@ -82,46 +78,14 @@
         }
       },
       {
-        "command": "bocaExplorer.addEntry",
-        "title": "Add"
-      },
-      {
-        "command": "bocaExplorer.editEntry",
-        "title": "Edit",
-        "icon": {
-          "light": "resources/light/edit.svg",
-          "dark": "resources/dark/edit.svg"
-        }
-      },
-      {
-        "command": "bocaExplorer.deleteEntry",
-        "title": "Delete"
-      },
-      {
-        "command": "bocaExplorer.selectContest",
-        "title": "Select Contest"
-      },
-      {
         "command": "bocaExplorer.selectProblem",
         "title": "Select Problem"
-      },
-      {
-        "command": "bocaExplorer.downloadProblem",
-        "title": "Download Problem To Workspace",
-        "icon": {
-          "light": "resources/light/desktop-download.svg",
-          "dark": "resources/dark/desktop-download.svg"
-        }
       }
     ],
     "menus": {
       "view/context": [
         {
           "command": "bocaExplorer.refreshEntry",
-          "when": "view == bocaExplorer"
-        },
-        {
-          "command": "bocaExplorer.addEntry",
           "when": "view == bocaExplorer"
         }
       ],
@@ -130,30 +94,6 @@
           "command": "bocaExplorer.refreshEntry",
           "when": "view == bocaExplorer",
           "group": "navigation"
-        },
-        {
-          "command": "bocaExplorer.addEntry",
-          "when": "view == bocaExplorer"
-        }
-      ],
-      "view/item/context": [
-        {
-          "command": "bocaExplorer.editEntry",
-          "when": "view == bocaExplorer && viewItem == contest",
-          "group": "inline"
-        },
-        {
-          "command": "bocaExplorer.deleteEntry",
-          "when": "view == bocaExplorer && viewItem == contest"
-        },
-        {
-          "command": "bocaExplorer.downloadProblem",
-          "when": "view == bocaExplorer && viewItem == problem",
-          "group": "inline"
-        },
-        {
-          "command": "bocaExplorer.downloadProblem",
-          "when": "view == bocaExplorer && viewItem == problem"
         }
       ]
     },
