@@ -25,18 +25,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
 		? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
 
-	const fileSystemProvider = new FileSystemProvider(context, rootPath);
-	vscode.window.registerTreeDataProvider('bocaExplorer', fileSystemProvider);
-	vscode.commands.registerCommand('bocaExplorer.refreshEntry', () => fileSystemProvider.refresh());
-	vscode.commands.registerCommand('bocaExplorer.openFile', (resource: vscode.Uri) => vscode.window.showTextDocument(resource));
-
-	const runProvider = new RunProvider(context, rootPath);
-	vscode.window.registerTreeDataProvider('runs', runProvider);
-	
-	vscode.commands.registerCommand('bocaExplorer.selectProblem', problemNumber => {
-		runProvider.refresh(problemNumber);
-	});
-
 	const authProvider = new AuthProvider();
 	vscode.commands.registerCommand('bocaExplorer.signIn', async () => {
 		const accessToken = await authProvider.signIn();
@@ -51,6 +39,21 @@ export async function activate(context: vscode.ExtensionContext) {
 				fileSystemProvider.refresh();
 			}
 		}
+	});
+
+	const fileSystemProvider = new FileSystemProvider(context, rootPath);
+	if (hasAccessToken) {
+		await fileSystemProvider.refresh();
+	}
+	vscode.window.registerTreeDataProvider('bocaExplorer', fileSystemProvider);
+	vscode.commands.registerCommand('bocaExplorer.refreshEntry', () => fileSystemProvider.refresh());
+	vscode.commands.registerCommand('bocaExplorer.openFile', (resource: vscode.Uri) => vscode.window.showTextDocument(resource));
+
+	const runProvider = new RunProvider(context, rootPath);
+	vscode.window.registerTreeDataProvider('runs', runProvider);
+	
+	vscode.commands.registerCommand('bocaExplorer.selectProblem', (contestNumber, problemNumber) => {
+		runProvider.refresh(contestNumber, problemNumber);
 	});
 }
 

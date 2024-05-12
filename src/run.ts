@@ -5,6 +5,7 @@ import { treeFileDecorationProvider } from './treeFileDecorationProvider';
 
 export class RunProvider implements vscode.TreeDataProvider<Run> {
 
+	private _contestNumber = 0;
 	private _problemNumber = 0;
 	private _onDidChangeTreeData: vscode.EventEmitter<Run | undefined | void> = new vscode.EventEmitter<Run | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Run | undefined | void> = this._onDidChangeTreeData.event;
@@ -12,7 +13,8 @@ export class RunProvider implements vscode.TreeDataProvider<Run> {
 	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
 	}
 
-	refresh(problemNumber: number): void {
+	refresh(contestNumber: number, problemNumber: number): void {
+		this._contestNumber = contestNumber;
 		this._problemNumber = problemNumber;
 		this._onDidChangeTreeData.fire();
 	}
@@ -39,13 +41,12 @@ export class RunProvider implements vscode.TreeDataProvider<Run> {
 		try {
 			const response = await axios({
 				method: 'get',
-				url: apiPath + '/problem/' + this._problemNumber + '/run',
+				url: apiPath + '/contest/' + this._contestNumber + '/problem/' + this._problemNumber + '/run',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
 			});
 			return (response.data || [])
-				.filter((run: any) => run.usernumber === 3151)
 				.sort((r1: any, r2: any) => r1.rundate - r2.rundate)
 				.map((run: any) => this._toRun(run));
 		} catch (error) {
