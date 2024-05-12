@@ -384,6 +384,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		if (contest?.problems.size) {
 			for (let [_, { problem }] of contest.problems) {
 				await this._createProblemDirectory(contestName, problem);
+				await this._getRuns(contestNumber, contestName, problem.problemnumber, problem.problemname);
 			};
 			return;
 		}
@@ -401,6 +402,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 				if (!problem.fake) {
 					contest?.problems.set(problem.problemname, { problem, runs: new Map() });
 					await this._createProblemDirectory(contestName, problem);
+					await this._getRuns(contestNumber, contestName, problem.problemnumber, problem.problemname);
 				}
 			}
 		} catch (error) {
@@ -460,6 +462,80 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			});
     });
 	}
+
+	private async _getRuns(contestNumber: number, contestName: string, problemNumber: number, problemName: string): Promise<void> {
+		const contest = this._contests.get(contestName);
+		const problem = contest?.problems.get(problemName);
+		if (contest?.problems.size && problem?.runs.size) {
+			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName, problemName, 'Runs'));
+			if (!fs.existsSync(uri.fsPath)) {
+				fs.mkdirSync(uri.fsPath);
+			}
+			for (let [_, run] of problem!.runs) {
+				await this._createRunDirectory(uri, problemNumber, run);
+			};
+			return;
+		}
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
+		try {
+			const response = await axios<Array<Run>>({
+				method: 'get',
+				url: apiPath + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
+			});
+			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName, problemName, 'Runs'));
+			if (!fs.existsSync(uri.fsPath)) {
+				fs.mkdirSync(uri.fsPath);
+			}
+			for (let run of (response.data || [])) {
+				problem?.runs.set(run.runnumber, run);
+				await this._createRunDirectory(uri, problemNumber, run);
+			}
+		} catch (error) {
+			vscode.window.showErrorMessage('Fetching runs failed');
+			console.error(error);
+		}
+	}
+
+	private async _createRunDirectory(uri: vscode.Uri, problemNumber: number, run: Run) {
+		const currentChildren = await this.readDirectory(uri);
+		const currentChild = currentChildren.find(child => child[0] === run.runnumber.toString());
+		if (!currentChild) {
+			const runUri = vscode.Uri.file(path.join(uri.fsPath, run.runnumber.toString()));
+			await this.createDirectory(runUri);
+			await this._downloadRunFile(runUri, run, problemNumber);
+		}
+	}
+
+	private async _downloadRunFile(uri: vscode.Uri, run: Run, problemNumber: number): Promise<void> {
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
+		const runFilePath = path.join(uri.fsPath, run.runfilename);
+		const writer = fs.createWriteStream(runFilePath);
+		return new Promise((resolve, reject) => {
+			axios({
+				method: 'get',
+				url: apiPath + '/contest/' + run.contestnumber + '/problem/' + problemNumber + '/run/' + run.runnumber + '/file',
+				responseType: 'stream',
+				headers: {
+					authorization: 'Bearer ' + accessToken
+				}
+			}).then(response => {
+				response.data.pipe(writer);
+				return finished(writer);
+			}).then(_ => {
+				resolve();
+			}).catch(error => {
+				vscode.window.showErrorMessage('Error downloading run');
+				console.error(error);
+				fs.rmSync(path.join(uri.fsPath), { recursive: true, force: true });
+				reject();
+			});
+    });
+	}
 }
 
 interface Contest {
@@ -491,4 +567,35 @@ interface Problem {
 	fake: boolean,
 	problemcolorname?: string,
 	problemcolor?: string
+}
+
+interface Run {
+	contestnumber: number;
+	runsitenumber: number;
+	runnumber: number;
+	usernumber: number;
+	rundate: number;
+	rundatediff: number;
+	rundatediffans: number;
+	runproblem: number;
+	runfilename: string;
+	rundata: number;
+	runanswer: number;
+	runstatus: string;
+	runjudge?: number;
+	runjudgesite?: number;
+	runanswer1: number;
+	runjudge1?: number;
+	runjudgesite1?: number;
+	runanswer2: number;
+	runjudge2?: number;
+	runjudgesite2?: number;
+	runlangnumber: number;
+	autoip?: string;
+	autobegindate?: number;
+	autoenddate?: number;
+	autoanswer?: string;
+	autostdout?: number;
+	autostderr?: number;
+	updatetime: number;
 }
