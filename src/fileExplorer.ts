@@ -158,6 +158,8 @@ interface Entry {
 //#endregion
 
 export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider {
+	private _contests: Map<string, { contest: Contest; problems: Map<string, { problem: Problem; runs: Map<number, Run>; }>; }>;
+	private _folderUri: vscode.Uri;
 
 	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 	private _onDidChangeTreeData: vscode.EventEmitter<Entry | undefined | void> = new vscode.EventEmitter<Entry | undefined | void>();
@@ -165,10 +167,16 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
 		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+		this._contests = new Map();
+		this._folderUri = vscode.Uri.file(path.join(context.storageUri!.fsPath, '..', 'boca-extension'));
+		if (!fs.existsSync(this._folderUri.fsPath)) {
+			fs.mkdirSync(this._folderUri.fsPath);
+		}
 	}
 
-	refresh(): void {
+	async refresh(): Promise<void> {
 		this._onDidChangeTreeData.fire();
+		await this._getContests();
 	}
 
 	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
@@ -325,58 +333,90 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		return treeItem;
 	}
 
-	private async _getContests(): Promise<Contest[]> {
+	private async _getContests(): Promise<void> {
+		if (this._contests.size) {
+			for (let [_, { contest }] of this._contests) {
+					await this._createContestDirectory(contest);
+					await this._getProblems(contest.contestnumber, contest.contestname);
+			};
+			return;
+		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
-			const response = await axios({
+			const response = await axios<Array<Contest>>({
 				method: 'get',
 				url: apiPath + '/contest',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
 			});
-			return (response.data || []).filter((contest: any) => contest.contestnumber !== 0);
+			for (let contest of (response.data || [])) {
+				if (contest.contestnumber !== 0) {
+					this._contests.set(contest.contestname, { contest, problems: new Map() });
+					await this._createContestDirectory(contest);
+					await this._getProblems(contest.contestnumber, contest.contestname);
+				}
+			};
 		} catch (error: any) {
 			if (error.response?.status === 401) {
 				vscode.commands.executeCommand('setContext', 'boca.showSignInView', true);
-				throw new Error('Token expired');
+				vscode.window.showErrorMessage('Token expired');
 			}
 			else {
 				vscode.window.showErrorMessage('Fetching contests failed');
 				console.error(error);
 			}
-			return [];
 		}
 	}
 
-	private async _getProblems(contestNumber: number): Promise<Problem[]> {
+	private async _createContestDirectory(contest: Contest) {
+		const currentChildren = await this.readDirectory(this._folderUri);
+		const currentChild = currentChildren.find(child => child[0] === contest.contestname);
+		if (!currentChild) {
+			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contest.contestname));
+			await this.createDirectory(uri);
+		}
+	}
+
+	private async _getProblems(contestNumber: number, contestName: string): Promise<void> {
+		const contest = this._contests.get(contestName);
+		if (contest?.problems.size) {
+			for (let [_, { problem }] of contest.problems) {
+				await this._createProblemDirectory(contestName, problem);
+			};
+			return;
+		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
-			const response = await axios({
+			const response = await axios<Array<Problem>>({
 				method: 'get',
 				url: apiPath + '/contest/' + contestNumber + '/problem',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
 			});
-			return (response.data || []).filter((problem: any) => !problem.fake);
+			for (let problem of (response.data || [])) {
+				if (!problem.fake) {
+					contest?.problems.set(problem.problemname, { problem, runs: new Map() });
+					await this._createProblemDirectory(contestName, problem);
+				}
+			}
 		} catch (error) {
 			vscode.window.showErrorMessage('Fetching problems failed');
 			console.error(error);
-			return [];
 		}
 	}
 
-	private async _createProblemsDirectories(uri: vscode.Uri, problems: Problem[]) {
-		const children = await this.readDirectory(uri);
-		for (let problem of problems) {
-			if (!children.find(child => child[0] === problem.problemname)) {
+	private async _createProblemDirectory(contestName: string, problem: Problem) {
+		const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName));
+		const currentChildren = await this.readDirectory(uri);
+		const currentChild = currentChildren.find(child => child[0] === problem.problemname);
+		if (!currentChild) {
 				const problemUri = vscode.Uri.file(path.join(uri.fsPath, problem.problemname));
 				await this.createDirectory(problemUri);
-				this._downloadProblemFile(problemUri, problem);
-			}
+			await this._downloadProblemFile(problemUri, problem);
 		}
 	}
 
