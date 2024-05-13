@@ -7,6 +7,7 @@ import axios from 'axios';
 import * as extract from 'extract-zip';
 import * as stream from 'stream';
 import { promisify } from 'util';
+import { treeFileDecorationProvider } from './treeFileDecorationProvider';
 
 const finished = promisify(stream.finished);
 
@@ -153,6 +154,11 @@ export class FileStat implements vscode.FileStat {
 interface Entry {
 	uri: vscode.Uri;
 	type: vscode.FileType;
+	color?: string;
+	solved?: boolean;
+	contextValue?: string;
+	problemNumber?: number;
+	contestNumber?: number;
 }
 
 //#endregion
@@ -288,49 +294,73 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 	async getChildren(element?: Entry): Promise<Entry[]> {
 		if (element) {
-			const children = await this.readDirectory(element.uri);
-			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(element.uri.fsPath, name)), type }));
+			const files = await this.readDirectory(element.uri);
+			const children = files.map(([name, type]) => {
+				let uri = vscode.Uri.file(path.join(element.uri.fsPath, name)), solved = false, problemNumber = 0, contestNumber = 0;
+				if (element.contextValue === 'contest') {
+					const { problem, runs } = this._contests.get(path.basename(element.uri.path!))!.problems.get(name)!;
+					problemNumber = problem.problemnumber;
+					contestNumber = problem.contestnumber;
+					solved = [...runs.values()].some(run => run.runanswer === 1);
+					treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
+				}
+				return {
+					uri,
+					type,
+					contextValue: this._getEntryContextValue(element, type),
+					problemNumber,
+					contestNumber,
+					solved
+				};
+			});
+			if (element.contextValue === 'contest') {
+				children.sort((a, b) => {
+					if (!a.solved && b.solved) {
+						return -1;
+					}
+					if (a.solved && !b.solved) {
+						return 1;
+					}
+					return -1;
+				});
+			}
+			return children;
 		}
 
-		const workspaceFolder = (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')[0];
-		if (workspaceFolder) {
-			const contests = await this._getContests();
-			const currentChildren = await this.readDirectory(workspaceFolder.uri);
-			const children: [string, vscode.FileType][] = [];
-			for (let contest of contests) {
-				const dirname = `${contest.contestnumber}-${contest.contestname}`;
-				const currentChild = currentChildren.find(child => child[0] === dirname);
-				if (currentChild) {
-					children.push(currentChild);
-				}
-				else {
-					const uri = vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, dirname));
-					await this.createDirectory(uri);
-					this._getProblems(contest.contestnumber).then(problems => {
-						this._createProblemsDirectories(uri, problems);
-					});
-					children.push([dirname, vscode.FileType.Directory]);
-				}
-			}
+		await this._getContests();
+		const children = await this.readDirectory(this._folderUri);
 			children.sort((a, b) => {
 				if (a[1] === b[1]) {
 					return a[0].localeCompare(b[0]);
 				}
 				return a[1] === vscode.FileType.Directory ? -1 : 1;
 			});
-			return children.map(([name, type]) => ({ uri: vscode.Uri.file(path.join(workspaceFolder.uri.fsPath, name)), type }));
-		}
-
-		return [];
+		return children.map(([name, type]) => ({
+			uri: vscode.Uri.file(path.join(this._folderUri.fsPath, name)), type, contextValue: 'contest'
+		}));
 	}
 
 	getTreeItem(element: Entry): vscode.TreeItem {
 		const treeItem = new vscode.TreeItem(element.uri, element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
+		treeItem.tooltip = path.basename(element.uri.path);
+		treeItem.contextValue = element.contextValue || 'file';
 		if (element.type === vscode.FileType.File) {
 			treeItem.command = { command: 'bocaExplorer.openFile', title: "Open File", arguments: [element.uri], };
-			treeItem.contextValue = 'file';
+		}
+		if (element.contextValue === 'problem') {
+			treeItem.command = { command: 'bocaExplorer.selectProblem', title: "Select Problem", arguments: [element.contestNumber, element.problemNumber], };
 		}
 		return treeItem;
+	}
+
+	private _getEntryContextValue(element: Entry, type: vscode.FileType) {
+		if (element.contextValue === 'contest') {
+			return 'problem';
+		}
+		if (element.contextValue === 'problem' && type === vscode.FileType.File) {
+			return 'file';
+		}
+		return undefined;
 	}
 
 	private async _getContests(): Promise<void> {
