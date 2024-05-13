@@ -27,7 +27,7 @@
     },
     "viewsWelcome": [
       {
-        "view": "bocaExplorer",
+        "view": "signIn",
         "contents": "You have to sign in to use this extension.\n[Sign In](command:bocaExplorer.signIn)",
         "when": "boca.showSignInView"
       },
@@ -45,6 +45,12 @@
     "views": {
       "boca-file-explorer": [
         {
+          "id": "signIn",
+          "name": "Sign In",
+          "contextualTitle": "BOCA",
+          "when": "boca.showSignInView"
+        },
+        {
           "id": "settings",
           "name": "Settings",
           "contextualTitle": "BOCA",
@@ -54,13 +60,13 @@
           "id": "bocaExplorer",
           "name": "Boca Explorer",
           "contextualTitle": "BOCA",
-          "when": "config.boca.api.path && config.boca.api.salt"
+          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
         },
         {
           "id": "runs",
           "name": "Runs",
           "contextualTitle": "BOCA",
-          "when": "config.boca.api.path && config.boca.api.salt"
+          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
         }
       ]
     },

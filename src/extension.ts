@@ -20,7 +20,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		vscode.ConfigurationTarget.Global
 	);
 	const hasAccessToken = !!context.globalState.get<string>('accessToken');
-	await vscode.commands.executeCommand('setContext', 'boca.showSignInView', hasAccessToken);
+	await vscode.commands.executeCommand('setContext', 'boca.showSignInView', !hasAccessToken);
 
 	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
 		? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
