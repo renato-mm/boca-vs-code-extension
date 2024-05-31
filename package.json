@@ -92,6 +92,14 @@
         "title": "New File"
       },
       {
+        "command": "bocaExplorer.submitRun",
+        "title": "Submit Run",
+        "icon": {
+          "light": "resources/light/file-symlink-file.svg",
+          "dark": "resources/dark/file-symlink-file.svg"
+        }
+      },
+      {
         "command": "bocaExplorer.selectProblem",
         "title": "Select Problem"
       },
@@ -122,6 +130,15 @@
         {
           "command": "bocaExplorer.createFile",
           "when": "view == bocaExplorer && viewItem == problem"
+        },
+        {
+          "command": "bocaExplorer.submitRun",
+          "when": "view == bocaExplorer && viewItem == file"
+        },
+        {
+          "command": "bocaExplorer.submitRun",
+          "when": "view == bocaExplorer && viewItem == file",
+          "group": "inline"
         }
       ]
     },

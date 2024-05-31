@@ -74,6 +74,9 @@ export async function activate(context: vscode.ExtensionContext) {
 			}
 		}
 	});
+	
+	vscode.commands.registerCommand('bocaExplorer.submitRun', (entry: Entry) => {
+		fileSystemProvider.submitRun(entry);
 	});
 	
 	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {

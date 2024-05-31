@@ -306,6 +306,10 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 					solved = [...runs.values()].some(run => run.runanswer === 1);
 					treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
 				}
+				if (element.contextValue === 'problem') {
+					problemNumber = element.problemNumber!;
+					contestNumber = element.contestNumber!;
+				}
 				return {
 					uri,
 					type,
@@ -355,6 +359,10 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		return treeItem;
 	}
 
+	submitRun(element: Entry): void {
+		console.log(element);
+	}
+
 	private _getEntryContextValue(element: Entry, type: vscode.FileType) {
 		if (element.contextValue === 'contest') {
 			return 'problem';
@@ -362,7 +370,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		if (element.contextValue === 'problem' && type === vscode.FileType.File) {
 			return 'file';
 		}
-		return undefined;
+		return type === vscode.FileType.Directory ? 'directory' : 'file';
 	}
 
 	private async _getContests(): Promise<void> {
