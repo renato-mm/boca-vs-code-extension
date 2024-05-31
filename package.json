@@ -86,6 +86,10 @@
       {
         "command": "bocaExplorer.selectProblem",
         "title": "Select Problem"
+      },
+      {
+        "command": "runs.selectRun",
+        "title": "Select Run"
       }
     ],
     "menus": {

@@ -19,6 +19,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		false,
 		vscode.ConfigurationTarget.Global
 	);
+	const outputChannel = vscode.window.createOutputChannel('BOCA');
 	const hasAccessToken = !!context.globalState.get<string>('accessToken');
 	await vscode.commands.executeCommand('setContext', 'boca.showSignInView', !hasAccessToken);
 
@@ -54,6 +55,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	
 	vscode.commands.registerCommand('bocaExplorer.selectProblem', (contestNumber, problemNumber) => {
 		runProvider.refresh(contestNumber, problemNumber);
+	});
+	
+	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {
+		vscode.window.showTextDocument(resource);
+		outputChannel.appendLine(message);
+		outputChannel.show();
 	});
 }
 
