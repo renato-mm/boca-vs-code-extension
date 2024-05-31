@@ -183,7 +183,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	async refresh(fetchData = true): Promise<void> {
 		this._onDidChangeTreeData.fire();
 		if (fetchData) {
-		await this._getContests();
+			await this._getContests();
 		}
 	}
 
@@ -335,12 +335,16 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 
 		await this._getContests();
 		const children = await this.readDirectory(this._folderUri);
-			children.sort((a, b) => {
-				if (a[1] === b[1]) {
-					return a[0].localeCompare(b[0]);
-				}
-				return a[1] === vscode.FileType.Directory ? -1 : 1;
-			});
+		const fileIndex = children.findIndex(file => file[0] === 'Runs' && file[1] === vscode.FileType.Directory);
+		if (fileIndex !== -1) {
+			children.splice(fileIndex, 1);
+		}
+		children.sort((a, b) => {
+			if (a[1] === b[1]) {
+				return a[0].localeCompare(b[0]);
+			}
+			return a[1] === vscode.FileType.Directory ? -1 : 1;
+		});
 		return children.map(([name, type]) => ({
 			uri: vscode.Uri.file(path.join(this._folderUri.fsPath, name)), type, contextValue: 'contest'
 		}));
@@ -456,8 +460,8 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		const currentChildren = await this.readDirectory(uri);
 		const currentChild = currentChildren.find(child => child[0] === problem.problemname);
 		if (!currentChild) {
-				const problemUri = vscode.Uri.file(path.join(uri.fsPath, problem.problemname));
-				await this.createDirectory(problemUri);
+			const problemUri = vscode.Uri.file(path.join(uri.fsPath, problem.problemname));
+			await this.createDirectory(problemUri);
 			await this._downloadProblemFile(problemUri, problem);
 		}
 	}
@@ -506,7 +510,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		const contest = this._contests.get(contestName);
 		const problem = contest?.problems.get(problemName);
 		if (contest?.problems.size && problem?.runs.size) {
-			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName, problemName, 'Runs'));
+			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, 'Runs'));
 			if (!fs.existsSync(uri.fsPath)) {
 				fs.mkdirSync(uri.fsPath);
 			}
@@ -525,7 +529,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 					authorization: 'Bearer ' + accessToken
 				}
 			});
-			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName, problemName, 'Runs'));
+			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, 'Runs'));
 			if (!fs.existsSync(uri.fsPath)) {
 				fs.mkdirSync(uri.fsPath);
 			}
