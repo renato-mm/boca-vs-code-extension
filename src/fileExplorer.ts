@@ -151,7 +151,7 @@ export class FileStat implements vscode.FileStat {
 	}
 }
 
-interface Entry {
+export interface Entry {
 	uri: vscode.Uri;
 	type: vscode.FileType;
 	color?: string;
@@ -180,9 +180,11 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		}
 	}
 
-	async refresh(): Promise<void> {
+	async refresh(fetchData = true): Promise<void> {
 		this._onDidChangeTreeData.fire();
+		if (fetchData) {
 		await this._getContests();
+		}
 	}
 
 	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {

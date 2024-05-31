@@ -88,6 +88,10 @@
         }
       },
       {
+        "command": "bocaExplorer.createFile",
+        "title": "New File"
+      },
+      {
         "command": "bocaExplorer.selectProblem",
         "title": "Select Problem"
       },
@@ -112,6 +116,12 @@
         {
           "command": "bocaExplorer.signOut",
           "when": "view == bocaExplorer"
+        }
+      ],
+      "view/item/context": [
+        {
+          "command": "bocaExplorer.createFile",
+          "when": "view == bocaExplorer && viewItem == problem"
         }
       ]
     },

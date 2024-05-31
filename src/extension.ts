@@ -1,8 +1,9 @@
 import * as vscode from 'vscode';
+import * as path from 'path';
 
 import { RunProvider } from './run';
 import { AuthProvider } from './auth';
-import { FileSystemProvider } from './fileExplorer';
+import { Entry, FileSystemProvider } from './fileExplorer';
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(
@@ -57,8 +58,22 @@ export async function activate(context: vscode.ExtensionContext) {
 	const runProvider = new RunProvider(context, rootPath);
 	vscode.window.registerTreeDataProvider('runs', runProvider);
 	
-	vscode.commands.registerCommand('bocaExplorer.selectProblem', (contestNumber, problemNumber) => {
-		runProvider.refresh(contestNumber, problemNumber);
+	vscode.commands.registerCommand('bocaExplorer.selectProblem', async (contestNumber: number, problemNumber: number) => {
+		await runProvider.refresh(contestNumber, problemNumber);
+	});
+	
+	vscode.commands.registerCommand('bocaExplorer.createFile', (entry: Entry) => {
+		const uri = vscode.Uri.file(path.join(entry.uri.fsPath, 'run.c'));
+		const content = new Uint8Array();
+		try {
+			fileSystemProvider.writeFile(uri, content, { create: true, overwrite: false });
+			fileSystemProvider.refresh(false);
+		} catch (error) {
+			if (error instanceof vscode.FileSystemError) {
+				vscode.window.showErrorMessage('File already exists!');
+			}
+		}
+	});
 	});
 	
 	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {
