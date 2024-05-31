@@ -72,6 +72,10 @@
     },
     "commands": [
 			{
+				"command": "bocaExplorer.signOut",
+				"title": "Sign Out"
+			},
+			{
 				"command": "bocaExplorer.openFile",
 				"title": "Open File"
 			},
@@ -104,6 +108,10 @@
           "command": "bocaExplorer.refreshEntry",
           "when": "view == bocaExplorer",
           "group": "navigation"
+        },
+        {
+          "command": "bocaExplorer.signOut",
+          "when": "view == bocaExplorer"
         }
       ]
     },

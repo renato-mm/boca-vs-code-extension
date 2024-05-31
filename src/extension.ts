@@ -32,6 +32,10 @@ export async function activate(context: vscode.ExtensionContext) {
 		context.globalState.update('accessToken', accessToken);
 		fileSystemProvider.refresh();
 	});
+	vscode.commands.registerCommand('bocaExplorer.signOut', async () => {
+		context.globalState.update('accessToken', null);
+		await vscode.commands.executeCommand('setContext', 'boca.showSignInView', true);
+	});
 
 	vscode.workspace.onDidChangeConfiguration(event => {
 		if (event.affectsConfiguration('boca.api')) {
