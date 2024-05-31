@@ -470,7 +470,6 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		const tempFilePath = path.join(tempFolderPath, 'temp.zip');
 		const descriptionFolderPath = path.join(tempFolderPath, 'description');
 		const writer = fs.createWriteStream(tempFilePath);
-		const readDir = _.readdir;
 		return new Promise((resolve, reject) => {
 			axios({
 				method: 'get',
@@ -485,13 +484,13 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			}).then(_ => {
 				return extract(tempFilePath, { dir: tempFolderPath });
 			}).then(_ => {
-				return readDir(descriptionFolderPath);
-			}).then(files => {
-				const problemFilename = files.find(file => file.includes('.zip'));
-				if (!problemFilename) { throw new Error('File not found'); }
-				const problemFilePath = path.join(descriptionFolderPath, problemFilename);
-				return extract(problemFilePath, { dir: uri.path });
-			}).then(_ => {
+				const problemInfoPath = path.join(descriptionFolderPath, 'problem.info');
+				const content = fs.readFileSync(problemInfoPath, { encoding: 'utf8' });
+				const match = content.match(/descfile=([\w_\.]+)\n?$/); // TODO: verificar possíveis caracteres
+				if (!match) {
+					throw new Error('Missing descfile');
+				}
+				fs.renameSync(path.join(descriptionFolderPath, match[1]), path.join(uri.fsPath, match[1]));
 				fs.rmSync(path.join(tempFolderPath), { recursive: true, force: true });
 				resolve();
 			}).catch(error => {
