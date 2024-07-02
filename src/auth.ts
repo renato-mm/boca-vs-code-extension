@@ -16,7 +16,7 @@ export class AuthProvider {
 		try {
 			const response = await axios({
 				method: 'get',
-				url: `${apiPath}/token?user=${username}&password=${saltedPassword}`
+				url: `${apiPath}/token?name=${username}&password=${saltedPassword}`
 			});
 			commands.executeCommand('setContext', 'boca.showSignInView', false);
 			return response.data.accessToken || '';
