@@ -28,11 +28,6 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 	}
 
 	getChildren(): Thenable<RunTreeItem[]> {
-		if (!this.workspaceRoot) {
-			vscode.window.showInformationMessage('No run in empty workspace');
-			return Promise.resolve([]);
-		}
-
 		return Promise.resolve(this._getRuns());
 	}
 

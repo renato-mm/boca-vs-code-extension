@@ -15,6 +15,9 @@
     "Other"
   ],
   "main": "./out/extension.js",
+  "activationEvents": [
+    "onStartupFinished"
+  ],
   "contributes": {
     "viewsContainers": {
       "activitybar": [
@@ -43,6 +46,14 @@
       }
     ],
     "views": {
+      "explorer": [
+        {
+          "id": "runs",
+          "name": "Runs",
+          "contextualTitle": "BOCA",
+          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
+        }
+      ],
       "boca-file-explorer": [
         {
           "id": "signIn",
@@ -59,12 +70,6 @@
         {
           "id": "bocaExplorer",
           "name": "Boca Explorer",
-          "contextualTitle": "BOCA",
-          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
-        },
-        {
-          "id": "runs",
-          "name": "Runs",
           "contextualTitle": "BOCA",
           "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
         }
