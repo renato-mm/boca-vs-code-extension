@@ -56,7 +56,11 @@ export async function activate(context: vscode.ExtensionContext) {
 	const runProvider = new RunProvider(context);
 	vscode.window.registerTreeDataProvider('runs', runProvider);
 	
-	vscode.commands.registerCommand('bocaExplorer.selectProblem', async (contestNumber: number, problemNumber: number) => {
+	vscode.commands.registerCommand('bocaExplorer.selectProblem', async (resource: vscode.Uri) => {
+		const { base: problemName, dir } = path.parse(resource.fsPath);
+		const contestName = path.parse(dir).base;
+		const contestNumber = fileSystemProvider.getContestNumber(contestName);
+		const problemNumber = fileSystemProvider.getProblemNumber(contestName, problemName);
 		await runProvider.refresh(contestNumber, problemNumber);
 	});
 	

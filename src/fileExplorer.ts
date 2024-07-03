@@ -194,7 +194,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 								contextValue: 'problem',
 								contestNumber: problem.contestnumber,
 								problemNumber: problem.problemnumber,
-					solved
+								solved
 							});
 							treeFileDecorationProvider.syncDecorator(uri, exists);
 							treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
@@ -226,7 +226,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 			}
 		}
 		else {
-		await this._getContests();
+			await this._getContests();
 			const currentChildren = await this.readDirectory(this._workspaceFolder.uri);
 			for (let [contestName, { contest }] of this._contests) {
 				const currentChild = currentChildren.find(child => child[0] === contestName);
@@ -253,6 +253,14 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 			treeItem.command = { command: 'bocaExplorer.selectProblem', title: "Select Problem", arguments: [element.contestNumber, element.problemNumber], };
 		}
 		return treeItem;
+	}
+
+	getContestNumber(contestName: string): number {
+		return this._contests.get(contestName)?.contest.contestnumber || 0;
+	}
+
+	getProblemNumber(contestName: string, problemName: string): number {
+		return this._contests.get(contestName)?.problems.get(problemName)?.problem.problemnumber || 0;
 	}
 
 	submitRun(element: Entry): void {
