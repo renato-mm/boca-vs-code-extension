@@ -24,9 +24,6 @@ export async function activate(context: vscode.ExtensionContext) {
 	const hasAccessToken = !!context.globalState.get<string>('accessToken');
 	await vscode.commands.executeCommand('setContext', 'boca.showSignInView', !hasAccessToken);
 
-	const rootPath = (vscode.workspace.workspaceFolders && (vscode.workspace.workspaceFolders.length > 0))
-		? vscode.workspace.workspaceFolders[0].uri.fsPath : undefined;
-
 	const authProvider = new AuthProvider();
 	vscode.commands.registerCommand('bocaExplorer.signIn', async () => {
 		const accessToken = await authProvider.signIn();
@@ -47,32 +44,20 @@ export async function activate(context: vscode.ExtensionContext) {
 		}
 	});
 
-	const fileSystemProvider = new FileSystemProvider(context, rootPath);
+	const fileSystemProvider = new FileSystemProvider(context);
 	if (hasAccessToken) {
 		await fileSystemProvider.refresh();
 	}
 	vscode.window.registerTreeDataProvider('bocaExplorer', fileSystemProvider);
 	vscode.commands.registerCommand('bocaExplorer.refreshEntry', () => fileSystemProvider.refresh());
-	vscode.commands.registerCommand('bocaExplorer.openFile', (resource: vscode.Uri) => vscode.window.showTextDocument(resource));
+	vscode.commands.registerCommand('bocaExplorer.synchronizeAll', () => fileSystemProvider.synchronize());
+	vscode.commands.registerCommand('bocaExplorer.synchronize', (entry?: Entry) => fileSystemProvider.synchronize(entry));
 
-	const runProvider = new RunProvider(context, rootPath);
+	const runProvider = new RunProvider(context);
 	vscode.window.registerTreeDataProvider('runs', runProvider);
 	
 	vscode.commands.registerCommand('bocaExplorer.selectProblem', async (contestNumber: number, problemNumber: number) => {
 		await runProvider.refresh(contestNumber, problemNumber);
-	});
-	
-	vscode.commands.registerCommand('bocaExplorer.createFile', (entry: Entry) => {
-		const uri = vscode.Uri.file(path.join(entry.uri.fsPath, 'run.c'));
-		const content = new Uint8Array();
-		try {
-			fileSystemProvider.writeFile(uri, content, { create: true, overwrite: false });
-			fileSystemProvider.refresh(false);
-		} catch (error) {
-			if (error instanceof vscode.FileSystemError) {
-				vscode.window.showErrorMessage('File already exists!');
-			}
-		}
 	});
 	
 	vscode.commands.registerCommand('bocaExplorer.submitRun', (entry: Entry) => {

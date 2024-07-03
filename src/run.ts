@@ -11,7 +11,7 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 	private _onDidChangeTreeData: vscode.EventEmitter<RunTreeItem | undefined | void> = new vscode.EventEmitter<RunTreeItem | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<RunTreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
-	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
+	constructor(private context: vscode.ExtensionContext) {
 		this._folderUri = vscode.Uri.file(path.join(context.storageUri!.fsPath, '..', 'boca-extension'));
 		this._contestsAnswers = new Map();
 	}

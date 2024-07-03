@@ -2,7 +2,6 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 import * as fs from 'fs';
 import * as mkdirp from 'mkdirp';
-import * as rimraf from 'rimraf';
 import axios from 'axios';
 import * as extract from 'extract-zip';
 import * as stream from 'stream';
@@ -17,13 +16,13 @@ namespace _ {
 
 	function handleResult<T>(resolve: (result: T) => void, reject: (error: Error) => void, error: Error | null | undefined, result: T): void {
 		if (error) {
-			reject(massageError(error));
+			reject(messageError(error));
 		} else {
 			resolve(result);
 		}
 	}
 
-	function massageError(error: Error & { code?: string }): Error {
+	function messageError(error: Error & { code?: string }): Error {
 		if (error.code === 'ENOENT') {
 			return vscode.FileSystemError.FileNotFound();
 		}
@@ -41,12 +40,6 @@ namespace _ {
 		}
 
 		return error;
-	}
-
-	export function checkCancellation(token: vscode.CancellationToken): void {
-		if (token.isCancellationRequested) {
-			throw new Error('Operation cancelled');
-		}
 	}
 
 	export function normalizeNFC(items: string): string;
@@ -75,45 +68,9 @@ namespace _ {
 		});
 	}
 
-	export function readfile(path: string): Promise<Buffer> {
-		return new Promise<Buffer>((resolve, reject) => {
-			fs.readFile(path, (error, buffer) => handleResult(resolve, reject, error, buffer));
-		});
-	}
-
-	export function writefile(path: string, content: Buffer): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			fs.writeFile(path, content, error => handleResult(resolve, reject, error, void 0));
-		});
-	}
-
-	export function exists(path: string): Promise<boolean> {
-		return new Promise<boolean>((resolve, reject) => {
-			fs.exists(path, exists => handleResult(resolve, reject, null, exists));
-		});
-	}
-
-	export function rmrf(path: string): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			rimraf(path, error => handleResult(resolve, reject, error, void 0));
-		});
-	}
-
 	export function mkdir(path: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			mkdirp(path, error => handleResult(resolve, reject, error, void 0));
-		});
-	}
-
-	export function rename(oldPath: string, newPath: string): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			fs.rename(oldPath, newPath, error => handleResult(resolve, reject, error, void 0));
-		});
-	}
-
-	export function unlink(path: string): Promise<void> {
-		return new Promise<void>((resolve, reject) => {
-			fs.unlink(path, error => handleResult(resolve, reject, error, void 0));
 		});
 	}
 }
@@ -154,6 +111,7 @@ export class FileStat implements vscode.FileStat {
 export interface Entry {
 	uri: vscode.Uri;
 	type: vscode.FileType;
+	exists?: boolean;
 	color?: string;
 	solved?: boolean;
 	contextValue?: string;
@@ -163,21 +121,19 @@ export interface Entry {
 
 //#endregion
 
-export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscode.FileSystemProvider {
+export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 	private _contests: Map<string, { contest: Contest; problems: Map<string, { problem: Problem; runs: Map<number, Run>; }>; }>;
-	private _folderUri: vscode.Uri;
+	private _workspaceFolder: vscode.WorkspaceFolder;
+	private _folderPath: string;
 
-	private _onDidChangeFile: vscode.EventEmitter<vscode.FileChangeEvent[]>;
 	private _onDidChangeTreeData: vscode.EventEmitter<Entry | undefined | void> = new vscode.EventEmitter<Entry | undefined | void>();
 	readonly onDidChangeTreeData: vscode.Event<Entry | undefined | void> = this._onDidChangeTreeData.event;
 
-	constructor(private context: vscode.ExtensionContext, private workspaceRoot: string | undefined) {
-		this._onDidChangeFile = new vscode.EventEmitter<vscode.FileChangeEvent[]>();
+	constructor(private context: vscode.ExtensionContext) {
 		this._contests = new Map();
-		this._folderUri = vscode.Uri.file(path.join(context.storageUri!.fsPath, '..', 'boca-extension'));
-		if (!fs.existsSync(this._folderUri.fsPath)) {
-			fs.mkdirSync(this._folderUri.fsPath);
-		}
+		this._workspaceFolder = (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')[0];
+		this._folderPath = path.join(context.storageUri!.fsPath, '..', 'boca-extension');
+		_.mkdir(this._folderPath);
 	}
 
 	async refresh(fetchData = true): Promise<void> {
@@ -185,31 +141,6 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		if (fetchData) {
 			await this._getContests();
 		}
-	}
-
-	get onDidChangeFile(): vscode.Event<vscode.FileChangeEvent[]> {
-		return this._onDidChangeFile.event;
-	}
-
-	watch(uri: vscode.Uri, options: { recursive: boolean; excludes: string[]; }): vscode.Disposable {
-		const watcher = fs.watch(uri.fsPath, { recursive: options.recursive }, async (event, filename) => {
-			if (filename) {
-				const filepath = path.join(uri.fsPath, _.normalizeNFC(filename.toString()));
-
-				// TODO support excludes (using minimatch library?)
-
-				this._onDidChangeFile.fire([{
-					type: event === 'change' ? vscode.FileChangeType.Changed : await _.exists(filepath) ? vscode.FileChangeType.Created : vscode.FileChangeType.Deleted,
-					uri: uri.with({ path: filepath })
-				} as vscode.FileChangeEvent]);
-			}
-		});
-
-		return { dispose: () => watcher.close() };
-	}
-
-	stat(uri: vscode.Uri): vscode.FileStat | Thenable<vscode.FileStat> {
-		return this._stat(uri.fsPath);
 	}
 
 	async _stat(path: string): Promise<vscode.FileStat> {
@@ -237,126 +168,87 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		return _.mkdir(uri.fsPath);
 	}
 
-	readFile(uri: vscode.Uri): Uint8Array | Thenable<Uint8Array> {
-		return _.readfile(uri.fsPath);
-	}
-
-	writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): void | Thenable<void> {
-		return this._writeFile(uri, content, options);
-	}
-
-	async _writeFile(uri: vscode.Uri, content: Uint8Array, options: { create: boolean; overwrite: boolean; }): Promise<void> {
-		const exists = await _.exists(uri.fsPath);
-		if (!exists) {
-			if (!options.create) {
-				throw vscode.FileSystemError.FileNotFound();
-			}
-
-			await _.mkdir(path.dirname(uri.fsPath));
-		} else {
-			if (!options.overwrite) {
-				throw vscode.FileSystemError.FileExists();
-			}
-		}
-
-		return _.writefile(uri.fsPath, content as Buffer);
-	}
-
-	delete(uri: vscode.Uri, options: { recursive: boolean; }): void | Thenable<void> {
-		if (options.recursive) {
-			return _.rmrf(uri.fsPath);
-		}
-
-		return _.unlink(uri.fsPath);
-	}
-
-	rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): void | Thenable<void> {
-		return this._rename(oldUri, newUri, options);
-	}
-
-	async _rename(oldUri: vscode.Uri, newUri: vscode.Uri, options: { overwrite: boolean; }): Promise<void> {
-		const exists = await _.exists(newUri.fsPath);
-		if (exists) {
-			if (!options.overwrite) {
-				throw vscode.FileSystemError.FileExists();
-			} else {
-				await _.rmrf(newUri.fsPath);
-			}
-		}
-
-		const parentExists = await _.exists(path.dirname(newUri.fsPath));
-		if (!parentExists) {
-			await _.mkdir(path.dirname(newUri.fsPath));
-		}
-
-		return _.rename(oldUri.fsPath, newUri.fsPath);
-	}
-
 	// tree data provider
 
 	async getChildren(element?: Entry): Promise<Entry[]> {
-		if (element) {
-			const files = await this.readDirectory(element.uri);
-			const children = files.map(([name, type]) => {
-				let uri = vscode.Uri.file(path.join(element.uri.fsPath, name)), solved = false, problemNumber = 0, contestNumber = 0;
-				if (element.contextValue === 'contest') {
-					const { problem, runs } = this._contests.get(path.basename(element.uri.path!))!.problems.get(name)!;
-					problemNumber = problem.problemnumber;
-					contestNumber = problem.contestnumber;
-					solved = [...runs.values()].some(run => run.runanswer === 1);
-					treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
-				}
-				if (element.contextValue === 'problem') {
-					problemNumber = element.problemNumber!;
-					contestNumber = element.contestNumber!;
-				}
-				return {
-					uri,
-					type,
-					contextValue: this._getEntryContextValue(element, type),
-					problemNumber,
-					contestNumber,
-					solved
-				};
-			});
-			if (element.contextValue === 'contest') {
-				children.sort((a, b) => {
-					if (!a.solved && b.solved) {
-						return -1;
-					}
-					if (a.solved && !b.solved) {
-						return 1;
-					}
-					return -1;
-				});
-			}
-			return children;
-		}
+		const children: Entry[] = [];
 
-		await this._getContests();
-		const children = await this.readDirectory(this._folderUri);
-		const fileIndex = children.findIndex(file => file[0] === 'Runs' && file[1] === vscode.FileType.Directory);
-		if (fileIndex !== -1) {
-			children.splice(fileIndex, 1);
-		}
-		children.sort((a, b) => {
-			if (a[1] === b[1]) {
-				return a[0].localeCompare(b[0]);
+		if (element) {
+			switch (element.contextValue) {
+				case 'contest':
+					const contestName = path.parse(element.uri.fsPath).base;
+					const contest = this._contests.get(contestName);
+					if (contest) {
+						for (let [problemName, { problem, runs }] of contest.problems) {
+							const uri = vscode.Uri.file(path.join(element.uri.fsPath, problemName));
+							let exists = fs.existsSync(uri.fsPath);
+							if (exists) {
+								const stat = fs.statSync(uri.fsPath);
+								exists = stat.isDirectory();
+							}
+							const solved = [...(runs.values() || [])].some(run => run.runanswer === 1);
+							children.push({
+								uri,
+								type: vscode.FileType.Directory,
+								exists,
+								contextValue: 'problem',
+								contestNumber: problem.contestnumber,
+								problemNumber: problem.problemnumber,
+					solved
+							});
+							treeFileDecorationProvider.syncDecorator(uri, exists);
+							treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
+						}
+					}
+					break;
+				
+				case 'problem':
+					const { base: problemName, dir } = path.parse(element.uri.fsPath);
+					const { problem } = this._contests.get(path.parse(dir).base)?.problems.get(problemName) || {};
+					if (problem?.probleminputfilename) {
+						const uri = vscode.Uri.file(path.join(element.uri.fsPath, problem.probleminputfilename));
+						let exists = fs.existsSync(uri.fsPath);
+						if (exists) {
+							const stat = fs.statSync(uri.fsPath);
+							exists = stat.isFile();
+						}
+						children.push({
+							uri,
+							type: vscode.FileType.File,
+							exists,
+							contextValue: 'file',
+							contestNumber: problem.contestnumber,
+							problemNumber: problem.problemnumber,
+						});
+						treeFileDecorationProvider.syncDecorator(uri, exists);
+					}
+					break;
 			}
-			return a[1] === vscode.FileType.Directory ? -1 : 1;
-		});
-		return children.map(([name, type]) => ({
-			uri: vscode.Uri.file(path.join(this._folderUri.fsPath, name)), type, contextValue: 'contest'
-		}));
+		}
+		else {
+		await this._getContests();
+			const currentChildren = await this.readDirectory(this._workspaceFolder.uri);
+			for (let [contestName, { contest }] of this._contests) {
+				const currentChild = currentChildren.find(child => child[0] === contestName);
+				const uri = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contestName));
+				const exists = Boolean(currentChild);
+				children.push({
+					uri,
+					type: currentChild?.[1] ?? vscode.FileType.Directory,
+					exists,
+					contextValue: 'contest',
+					contestNumber: contest.contestnumber,
+				});
+				treeFileDecorationProvider.syncDecorator(uri, exists);
+			}
+		}
+		return children;
 	}
 
 	getTreeItem(element: Entry): vscode.TreeItem {
 		const treeItem = new vscode.TreeItem(element.uri, element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
 		treeItem.tooltip = path.basename(element.uri.path);
 		treeItem.contextValue = element.contextValue || 'file';
-		if (element.type === vscode.FileType.File) {
-			treeItem.command = { command: 'bocaExplorer.openFile', title: "Open File", arguments: [element.uri], };
-		}
 		if (element.contextValue === 'problem') {
 			treeItem.command = { command: 'bocaExplorer.selectProblem', title: "Select Problem", arguments: [element.contestNumber, element.problemNumber], };
 		}
@@ -367,24 +259,62 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		console.log(element);
 	}
 
-	private _getEntryContextValue(element: Entry, type: vscode.FileType) {
-		if (element.contextValue === 'contest') {
-			return 'problem';
+	async synchronize(element?: Entry): Promise<void> {
+		if (element) {
+			switch (element.contextValue) {
+				case 'contest':
+					await this.createDirectory(element.uri);
+					const contestName = path.parse(element.uri.fsPath).base;
+					const contest = this._contests.get(contestName);
+					if (contest) {
+						for (let [problemName, { problem }] of contest.problems) {
+							const uri = vscode.Uri.file(path.join(element.uri.fsPath, problemName));
+							await this.createDirectory(uri);
+							if (problem) {
+								await this._downloadProblemFile(uri, problem);
+							}
+						}
+					}
+					break;
+				
+				case 'problem':
+					await this.createDirectory(element.uri);
+					const { base: problemName1, dir: contestDir1 } = path.parse(element.uri.fsPath);
+					const { problem: problem1 } = this._contests.get(path.parse(contestDir1).base)?.problems.get(problemName1) || {};
+					if (problem1) {
+						await this._downloadProblemFile(element.uri, problem1);
+					}
+					break;
+				
+				case 'file':
+					const problemDir = path.parse(element.uri.fsPath).dir;
+					const { base: problemName2, dir: contestDir2 } = path.parse(problemDir);
+					const { problem: problem2 } = this._contests.get(path.parse(contestDir2).base)?.problems.get(problemName2) || {};
+					const uri = vscode.Uri.file(problemDir);
+					await this.createDirectory(uri);
+					if (problem2) {
+						await this._downloadProblemFile(uri, problem2);
+					}
+					break;
+			}
 		}
-		if (element.contextValue === 'problem' && type === vscode.FileType.File) {
-			return 'file';
+		else {
+			for (let [contestName, { problems }] of this._contests) {
+				const uri = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contestName));
+				await this.createDirectory(uri);
+				for (let [problemName, { problem }] of (problems || [])) {
+					const problemUri = vscode.Uri.file(path.join(uri.fsPath, problemName));
+					await this.createDirectory(problemUri);
+					if (problem) {
+						await this._downloadProblemFile(problemUri, problem);
+					}
+				}
+			}
 		}
-		return type === vscode.FileType.Directory ? 'directory' : 'file';
+		this._onDidChangeTreeData.fire();
 	}
 
 	private async _getContests(): Promise<void> {
-		if (this._contests.size) {
-			for (let [_, { contest }] of this._contests) {
-					await this._createContestDirectory(contest);
-					await this._getProblems(contest.contestnumber, contest.contestname);
-			};
-			return;
-		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
@@ -397,8 +327,8 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			});
 			for (let contest of (response.data || [])) {
 				if (contest.contestnumber !== 0) {
+					contest.contesturi = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contest.contestname));
 					this._contests.set(contest.contestname, { contest, problems: new Map() });
-					await this._createContestDirectory(contest);
 					await this._getProblems(contest.contestnumber, contest.contestname);
 				}
 			};
@@ -414,24 +344,8 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		}
 	}
 
-	private async _createContestDirectory(contest: Contest) {
-		const currentChildren = await this.readDirectory(this._folderUri);
-		const currentChild = currentChildren.find(child => child[0] === contest.contestname);
-		if (!currentChild) {
-			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contest.contestname));
-			await this.createDirectory(uri);
-		}
-	}
-
 	private async _getProblems(contestNumber: number, contestName: string): Promise<void> {
 		const contest = this._contests.get(contestName);
-		if (contest?.problems.size) {
-			for (let [_, { problem }] of contest.problems) {
-				await this._createProblemDirectory(contestName, problem);
-				await this._getRuns(contestNumber, contestName, problem.problemnumber, problem.problemname);
-			};
-			return;
-		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
@@ -444,9 +358,12 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 			});
 			for (let problem of (response.data || [])) {
 				if (!problem.fake) {
+					problem.problemuri = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contestName, problem.problemname));
 					contest?.problems.set(problem.problemname, { problem, runs: new Map() });
-					await this._createProblemDirectory(contestName, problem);
 					await this._getRuns(contestNumber, contestName, problem.problemnumber, problem.problemname);
+					const runs = contest?.problems.get(problem.problemname)?.runs;
+					const solved = [...(runs!.values() || [])].some(run => run.runanswer === 1);
+					treeFileDecorationProvider.updateProblemDecorator(problem.problemuri, solved, problem.problemcolorname!.toLowerCase());
 				}
 			}
 		} catch (error) {
@@ -455,22 +372,20 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 		}
 	}
 
-	private async _createProblemDirectory(contestName: string, problem: Problem) {
-		const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, contestName));
-		const currentChildren = await this.readDirectory(uri);
-		const currentChild = currentChildren.find(child => child[0] === problem.problemname);
-		if (!currentChild) {
-			const problemUri = vscode.Uri.file(path.join(uri.fsPath, problem.problemname));
-			await this.createDirectory(problemUri);
-			await this._downloadProblemFile(problemUri, problem);
-		}
-	}
-
 	private async _downloadProblemFile(uri: vscode.Uri, problem: Problem): Promise<void> {
+		if (problem?.probleminputfilename) {
+			const fileUri = path.join(uri.fsPath, problem.probleminputfilename);
+			if (fs.existsSync(fileUri)) {
+				const stat = fs.statSync(fileUri);
+				if (stat.isFile()) {
+					return;
+				}
+			}
+		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
-		const tempFolderPath = path.join(uri.fsPath, 'temp');
-		fs.mkdirSync(tempFolderPath);
+		const tempFolderPath = path.join(this._folderPath, problem.contestnumber.toString(), problem.problemname, 'temp');
+		await this.createDirectory(vscode.Uri.file(tempFolderPath));
 		const tempFilePath = path.join(tempFolderPath, 'temp.zip');
 		const descriptionFolderPath = path.join(tempFolderPath, 'description');
 		const writer = fs.createWriteStream(tempFilePath);
@@ -509,16 +424,6 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 	private async _getRuns(contestNumber: number, contestName: string, problemNumber: number, problemName: string): Promise<void> {
 		const contest = this._contests.get(contestName);
 		const problem = contest?.problems.get(problemName);
-		if (contest?.problems.size && problem?.runs.size) {
-			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, 'Runs'));
-			if (!fs.existsSync(uri.fsPath)) {
-				fs.mkdirSync(uri.fsPath);
-			}
-			for (let [_, run] of problem!.runs) {
-				await this._createRunDirectory(uri, problemNumber, run);
-			};
-			return;
-		}
 		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
@@ -529,116 +434,39 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry>, vscod
 					authorization: 'Bearer ' + accessToken
 				}
 			});
-			const uri = vscode.Uri.file(path.join(this._folderUri.fsPath, 'Runs'));
-			if (!fs.existsSync(uri.fsPath)) {
-				fs.mkdirSync(uri.fsPath);
-			}
 			for (let run of (response.data || [])) {
 				problem?.runs.set(run.runnumber, run);
-				await this._createRunDirectory(uri, problemNumber, run);
 			}
 		} catch (error) {
 			vscode.window.showErrorMessage('Fetching runs failed');
 			console.error(error);
 		}
 	}
-
-	private async _createRunDirectory(uri: vscode.Uri, problemNumber: number, run: Run) {
-		const currentChildren = await this.readDirectory(uri);
-		const currentChild = currentChildren.find(child => child[0] === run.runnumber.toString());
-		if (!currentChild) {
-			const runUri = vscode.Uri.file(path.join(uri.fsPath, run.runnumber.toString()));
-			await this.createDirectory(runUri);
-			await this._downloadRunFile(runUri, run, problemNumber);
-		}
-	}
-
-	private async _downloadRunFile(uri: vscode.Uri, run: Run, problemNumber: number): Promise<void> {
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
-		const accessToken = this.context.globalState.get<string>('accessToken');
-		const runFilePath = path.join(uri.fsPath, run.runfilename);
-		const writer = fs.createWriteStream(runFilePath);
-		return new Promise((resolve, reject) => {
-			axios({
-				method: 'get',
-				url: apiPath + '/contest/' + run.contestnumber + '/problem/' + problemNumber + '/run/' + run.runnumber + '/file',
-				responseType: 'stream',
-				headers: {
-					authorization: 'Bearer ' + accessToken
-				}
-			}).then(response => {
-				response.data.pipe(writer);
-				return finished(writer);
-			}).then(_ => {
-				resolve();
-			}).catch(error => {
-				vscode.window.showErrorMessage('Error downloading run');
-				console.error(error);
-				fs.rmSync(path.join(uri.fsPath), { recursive: true, force: true });
-				reject();
-			});
-    });
-	}
 }
 
 interface Contest {
-	contestnumber: number,
-	contestname: string,
-	conteststartdate: number,
-	contestduration: number,
-	contestlastmileanswer?: number,
-	contestlastmilescore?: number,
-	contestlocalsite: number,
-	contestpenalty: number,
-	contestmaxfilesize: number,
-	contestactive: boolean,
-	contestmainsite: number,
-	contestkeys: string,
-	contestunlockkey: string,
-	contestmainsiteurl: string
+	contestnumber: number;
+	contestname: string;
+	contestmainsite: number;
+	conteststartdate: number;
+	contesturi?: vscode.Uri;
 }
 
 interface Problem {
-	contestnumber: number,
-	problemnumber: number,
-	problemname: string,
-	problemfullname?: string,
-	problembasefilename?: string,
+	contestnumber: number;
+	problemnumber: number;
+	problemname: string;
 	probleminputfilename?: string,
-	probleminputfile?: number,
-	probleminputfilehash?: string,
-	fake: boolean,
-	problemcolorname?: string,
-	problemcolor?: string
+	fake: boolean;
+	problemcolorname?: string;
+	problemcolor?: string;
+	problemuri?: vscode.Uri;
 }
 
 interface Run {
-	contestnumber: number;
-	runsitenumber: number;
 	runnumber: number;
 	usernumber: number;
-	rundate: number;
-	rundatediff: number;
-	rundatediffans: number;
-	runproblem: number;
-	runfilename: string;
-	rundata: number;
 	runanswer: number;
-	runstatus: string;
-	runjudge?: number;
-	runjudgesite?: number;
 	runanswer1: number;
-	runjudge1?: number;
-	runjudgesite1?: number;
 	runanswer2: number;
-	runjudge2?: number;
-	runjudgesite2?: number;
-	runlangnumber: number;
-	autoip?: string;
-	autobegindate?: number;
-	autoenddate?: number;
-	autoanswer?: string;
-	autostdout?: number;
-	autostderr?: number;
-	updatetime: number;
 }

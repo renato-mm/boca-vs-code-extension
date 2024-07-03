@@ -76,14 +76,10 @@
       ]
     },
     "commands": [
-			{
-				"command": "bocaExplorer.signOut",
-				"title": "Sign Out"
-			},
-			{
-				"command": "bocaExplorer.openFile",
-				"title": "Open File"
-			},
+      {
+        "command": "bocaExplorer.signOut",
+        "title": "Sign Out"
+      },
       {
         "command": "bocaExplorer.refreshEntry",
         "title": "Refresh",
@@ -93,8 +89,20 @@
         }
       },
       {
-        "command": "bocaExplorer.createFile",
-        "title": "New File"
+        "command": "bocaExplorer.synchronizeAll",
+        "title": "Synchronize",
+        "icon": {
+          "light": "resources/light/sync.svg",
+          "dark": "resources/dark/sync.svg"
+        }
+      },
+      {
+        "command": "bocaExplorer.synchronize",
+        "title": "Synchronize",
+        "icon": {
+          "light": "resources/light/sync.svg",
+          "dark": "resources/dark/sync.svg"
+        }
       },
       {
         "command": "bocaExplorer.submitRun",
@@ -114,6 +122,13 @@
       }
     ],
     "menus": {
+      "explorer/context": [
+        {
+          "command": "bocaExplorer.selectProblem",
+          "group": "1_boca",
+          "when": "explorerResourceIsFolder"
+        }
+      ],
       "view/context": [
         {
           "command": "bocaExplorer.refreshEntry",
@@ -127,22 +142,23 @@
           "group": "navigation"
         },
         {
+          "command": "bocaExplorer.synchronizeAll",
+          "when": "view == bocaExplorer",
+          "group": "navigation"
+        },
+        {
           "command": "bocaExplorer.signOut",
           "when": "view == bocaExplorer"
         }
       ],
       "view/item/context": [
         {
-          "command": "bocaExplorer.createFile",
-          "when": "view == bocaExplorer && viewItem == problem"
+          "command": "bocaExplorer.synchronize",
+          "when": "view == bocaExplorer"
         },
         {
-          "command": "bocaExplorer.submitRun",
-          "when": "view == bocaExplorer && viewItem == file"
-        },
-        {
-          "command": "bocaExplorer.submitRun",
-          "when": "view == bocaExplorer && viewItem == file",
+          "command": "bocaExplorer.synchronize",
+          "when": "view == bocaExplorer",
           "group": "inline"
         }
       ]

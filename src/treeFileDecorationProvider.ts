@@ -14,11 +14,28 @@ import {
 class TreeFileDecorationProvider implements FileDecorationProvider {
 	private _disposables: Array<Disposable> = [];
 	private _fileDecorations: Map<string, FileDecoration> = new Map<string, FileDecoration>();
+	private _unsynchronizedDecorator: FileDecoration = {
+		badge: '⚠',
+		color: new ThemeColor('bocaExplorer.red'),
+		tooltip: 'Unsynchronized'
+	}; 
 
 	constructor() {
     this._disposables = [];
     this._disposables.push(window.registerFileDecorationProvider(this));
   }
+
+	syncDecorator(resourceUri: Uri, exists: boolean): void {
+		const hasDecoration = this._fileDecorations.has(resourceUri.toString());
+		if (!exists && !hasDecoration) {
+			this._fileDecorations.set(resourceUri.toString(), this._unsynchronizedDecorator);
+			this._onDidChangeFileDecorations.fire(resourceUri);
+		}
+		if (exists && hasDecoration) {
+			this._fileDecorations.delete(resourceUri.toString());
+			this._onDidChangeFileDecorations.fire(resourceUri);
+		}
+	}
 
 	updateProblemDecorator(resourceUri: Uri, solved: boolean, color: string): void {
 		const decorator: FileDecoration = {
