@@ -7,6 +7,7 @@ import * as extract from 'extract-zip';
 import * as stream from 'stream';
 import { promisify } from 'util';
 import { treeFileDecorationProvider } from './treeFileDecorationProvider';
+import FormData = require('form-data');
 
 const finished = promisify(stream.finished);
 
@@ -263,8 +264,44 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 		return this._contests.get(contestName)?.problems.get(problemName)?.problem.problemnumber || 0;
 	}
 
-	submitRun(element: Entry): void {
-		console.log(element);
+	async submitRun(resource: vscode.Uri): Promise<void> {
+		const { base: problemName, dir } = path.parse(path.parse(resource.fsPath).dir);
+		const contestName = path.parse(dir).base;
+		const {
+			contest: {
+				contestnumber: contestNumber,
+				contestmainsite: runsitenumber,
+				conteststartdate
+			},
+			problems
+		} = this._contests.get(contestName)!;
+		const { problem: { problemnumber: problemNumber } } = problems.get(problemName)!;
+		const rundate = Math.round(Date.now() / 1000);
+		const rundatediff = rundate - conteststartdate;
+		const usernumber = 1001;
+		const runlangnumber = 1;
+		const body = { runsitenumber, usernumber, rundate, runlangnumber, rundatediff };
+		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const accessToken = this.context.globalState.get<string>('accessToken');
+		const form = new FormData();
+		form.append('data', JSON.stringify(body));
+		form.append('runfile', fs.createReadStream(resource.fsPath));
+		try {
+			const response = await axios<Run>({
+				method: 'post',
+				url: apiPath + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
+				data: form,
+				headers: {
+					authorization: 'Bearer ' + accessToken,
+					...form.getHeaders()
+				}
+			});
+			const { data: { runnumber } } = response;
+			vscode.window.showInformationMessage(`Run ${runnumber} successfully submitted`);
+		} catch (error) {
+			vscode.window.showErrorMessage('Submiting run failed');
+			console.error(error);
+		}
 	}
 
 	async synchronize(element?: Entry): Promise<void> {

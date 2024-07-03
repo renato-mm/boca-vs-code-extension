@@ -64,8 +64,8 @@ export async function activate(context: vscode.ExtensionContext) {
 		await runProvider.refresh(contestNumber, problemNumber);
 	});
 	
-	vscode.commands.registerCommand('bocaExplorer.submitRun', (entry: Entry) => {
-		fileSystemProvider.submitRun(entry);
+	vscode.commands.registerCommand('bocaExplorer.submitRun', (resource: vscode.Uri) => {
+		fileSystemProvider.submitRun(resource);
 	});
 	
 	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {
