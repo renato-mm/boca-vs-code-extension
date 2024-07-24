@@ -1,71 +1,130 @@
-# boca README
+# :balloon: boca-vs-code-extension
 
-This is the README for your extension "boca". After writing up a brief description, we recommend including the following sections.
+[![Google_Groups][groups_badge]][groups_link]
 
-## Features
+[close_stale_workflow_badge]: https://img.shields.io/github/actions/workflow/status/renato-mm/boca-vs-code-extension/close-stale.yml?label=close%20stale&logo=github
+[close_stale_workflow_link]: https://github.com/renato-mm/boca-vs-code-extension/actions?workflow=close%20stale "close stale issues and prs"
+[groups_badge]: https://img.shields.io/badge/join-boca--users%20group-blue.svg?logo=data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAACAAAAAgCAYAAABzenr0AAAAAXNSR0IArs4c6QAAAJBlWElmTU0AKgAAAAgABgEGAAMAAAABAAIAAAESAAMAAAABAAEAAAEaAAUAAAABAAAAVgEbAAUAAAABAAAAXgEoAAMAAAABAAIAAIdpAAQAAAABAAAAZgAAAAAAAABIAAAAAQAAAEgAAAABAAOgAQADAAAAAQABAACgAgAEAAAAAQAAACCgAwAEAAAAAQAAACAAAAAAF9yy1AAAAAlwSFlzAAALEwAACxMBAJqcGAAAAm1pVFh0WE1MOmNvbS5hZG9iZS54bXAAAAAAADx4OnhtcG1ldGEgeG1sbnM6eD0iYWRvYmU6bnM6bWV0YS8iIHg6eG1wdGs9IlhNUCBDb3JlIDYuMC4wIj4KICAgPHJkZjpSREYgeG1sbnM6cmRmPSJodHRwOi8vd3d3LnczLm9yZy8xOTk5LzAyLzIyLXJkZi1zeW50YXgtbnMjIj4KICAgICAgPHJkZjpEZXNjcmlwdGlvbiByZGY6YWJvdXQ9IiIKICAgICAgICAgICAgeG1sbnM6dGlmZj0iaHR0cDovL25zLmFkb2JlLmNvbS90aWZmLzEuMC8iPgogICAgICAgICA8dGlmZjpQaG90b21ldHJpY0ludGVycHJldGF0aW9uPjI8L3RpZmY6UGhvdG9tZXRyaWNJbnRlcnByZXRhdGlvbj4KICAgICAgICAgPHRpZmY6WFJlc29sdXRpb24+NzI8L3RpZmY6WFJlc29sdXRpb24+CiAgICAgICAgIDx0aWZmOllSZXNvbHV0aW9uPjcyPC90aWZmOllSZXNvbHV0aW9uPgogICAgICAgICA8dGlmZjpPcmllbnRhdGlvbj4xPC90aWZmOk9yaWVudGF0aW9uPgogICAgICAgICA8dGlmZjpDb21wcmVzc2lvbj4xPC90aWZmOkNvbXByZXNzaW9uPgogICAgICAgICA8dGlmZjpSZXNvbHV0aW9uVW5pdD4yPC90aWZmOlJlc29sdXRpb25Vbml0PgogICAgICA8L3JkZjpEZXNjcmlwdGlvbj4KICAgPC9yZGY6UkRGPgo8L3g6eG1wbWV0YT4KsVruIwAABUVJREFUWAnlV81v3EQUfzP22Nn1pmmQ0kqVUAqCSlA4ckNlScKh4sApSPwBSEUExAlIAqoDNO0R0SIqlb+gPXKgICVZ8XGCG0olBFLUQxBN0kTVrr27/pjhvbG96/V+sFJ7QGKiWb9583vf88YOwP99sHESsLiojP2zoLEz26Bu3WLxILlxcYNkh/AUI6XFzYSncs6PiytqgiSqfjZxyABTRM1f9l5QcTxPNDOMjY1l5xeiEww9x8ElGELnRy6KPJvoxIG59fpVQ1SWeJoHicmPw8a1zZXJd0ClWWBMjcTlgila4UUGrauuMimquc8a79mTlaU48KKw6YU0iSYe7QEapvmvONSV6Oy3NtCBmssiDWVwIfQ1SZkS6WSax+CtjjqkR+AuEK6jsyOUEP0loLRiVC9eVtNW3PiTGeZjSsZ0FjKsYtxgyDtqm81ZUmNHpbvImx6Ii6PDwKg89dMyO9Ilo6zlRn8GUoAWYGyfcawGgMzJyJS3//MHM3WauDcchzq0LlJQME6sfgeQ2amXguuirB0gr8N0Ks1T8BWuk4H0CNx1AnV0piLZI0trts49sy7wrpp2eYmlXaCwC6K2j13g9HTBy5fq18RE5W3qFvJW4dGJghQ3oguGO+C6vAoXOR2e+fX6s0rCOfKOcfhhY2XyDkVUuwgxrAGrYiYJt/Bp/RnJ4CVKrDLNH7c+tLer7hbiqvGg9Gt99FMcdNNl1+35L5TdbNSf4JKdADBB8nCvVJnc+fZd1s7LLVw5nIrBOm0oYzpWKhRx8Nf3Hx/f0Rg62OgouCx/lvRWXwYWb6Lx1/GudxWfE/4yJvNNbk7MGlZSgziIQUatu5iLG5urzqWFK2oqjrxPGIM3DKs8w01UiTWIggCUDPHNwT5H3NdkzUWdbsGJHgcy46+43qlYqO8sx3kuaoWg4kCiTu09CnAwLG6VBTw4OPjVMMypyvTxpwOvjQYjwuAktcrgosQQCkHDu70XOa9tuyygwPKZ6DqQ9j/WtsKF95s54ZyOWqg1uYBy3UKXH5dBGEY7+3uWxTnMnjgZcM5NpVB5fjA8Iwoiq+LYgedtbq5U5vPbRHcEqms1nWNDeF8Kp2PczmMSYfQZDd27v2e127584NflwdGBhbcX6sI85YcC0mljBtqYzbn59cb7tI1B6t4mWmcgq838euuMUvHvZAEn7nUTRGAywLEfvWYD/vh7FyzDSJC4c+bU4yCEheuCE7iHWiQYgqs4vOeEzpPfuMxP9Scpq6WZkCp6VZTKKALYxUXjxMaB7EbT14YpYDx8EMYx+C0faTbQAYSR8ciwnZO+7Z0jNYs3k+x3SqB1K3g+9X+odYqwHQaYiV5IG0+91tHL1rzsB48L5eIsrffvJBF2aqFBDJxiGTUfPwHwqX0jB6SUOvKsSOSLxJsqQQz1IEJRUyp1LNWpH70O5HeIxozSn2k7hk5YmnJRmkZjDTCyr5Q4Agt5ZqmEzhWVJGv0zxRY3ahF9e+OUQ6QccBe5mHLu41RHqKYyTHAY0Kpw6ABEotO9mz84CgLBUHTo3etYtmXUmoHI8feBTM+hD0RyhvE1te4S3fr4EHplqLkGGGzsbb10SRCR4/d0duFXSxe+mrucYAOcYqUouyI0PfdzdXJNXqhYPfiVg1n8qxlJHKIXa0SoX+IGDp05Lnvgh4H8IAJcgFvQTv0G9p4cj3TIez9ktEWal072qHucjjl9m7xwnLXLOGRb/urFHlqHMs8wHiv4MOuqKEAzrv3j9H/AFqbPkgJ/2G1jynfNUZX85hCjxo2+F+sR23lP6XvH9zRm0CuC6knAAAAAElFTkSuQmCC
+[groups_link]: https://groups.google.com/g/boca-users "boca-users@Google Groups"
 
-Describe specific features of your extension including screenshots of your extension in action. Image paths are relative to this README file.
+## Table of Contents
 
-For example if there is an image subfolder under your extension project workspace:
+- [What Is BOCA?](#what-is-boca)
+- [How To Install The Extension](#how-to-install-the-extension)
+  - [Option 1](#option-1)
+  - [Option 2](#option-2)
+- [Configuration](#configuration)
+- [How To Contribute](#how-to-contribute)
+- [License](#license)
+- [Support](#support)
 
-\!\[feature X\]\(images/feature-x.png\)
+## What Is BOCA?
 
-> Tip: Many popular extensions utilize animations. This is an excellent way to show off your extension! We recommend short, focused animations that are easy to follow.
+The BOCA Online Contest Administrator, commonly referred to as BOCA, is a robust administrative system designed for orchestrating programming contests following the [ACM-ICPC](https://icpc.global/) rules, particularly the [Maratona SBC de Programação](https://maratona.sbc.org.br/).
+BOCA represents a powerful tool for streamlining the administration of programming contests, making it a valuable asset for contest organizers and participants.
+For more in-depth information, please visit the official repository at [https://github.com/cassiopc/boca](https://github.com/cassiopc/boca).
 
-## Requirements
+In order to grant access to the system, it is imperative to ascertain whether the user attempting to connect possesses the necessary credentials. At present, BOCA's sole authentication method mandates that a user's provided password undergo encryption before transmission across the connection and storage in the database.
+This encryption process employs cryptographic hashing, which is widely regarded as a secure means of safeguarding sensitive data. Its primary objective is to thwart any attempts at password interception on untrusted connections, although it is worth noting that SSL certificate authentication may represent a more robust alternative.
+## How To Install The Extension
 
-If you have any requirements or dependencies, add a section describing those and how to install and configure them.
+As it was explained before, the extension is developed for [Visual Studio Code](https://code.visualstudio.com), so in order to use it you must install it in VS Code.
 
-## Extension Settings
+### Option 1
 
-Include if your extension adds any VS Code settings through the `contributes.configuration` extension point.
+You can install it by searching for "BOCA" at the marketplace, either at the editor's extensions view or at the [website](https://marketplace.visualstudio.com/items?itemName=ardoboehme.boca). Once you find it you just hit the "Install" button.
 
-For example:
+<details>
+<summary>
+Through the extensions view.
+</summary>
+<br>
 
-This extension contributes the following settings:
+![image](https://github.com/user-attachments/assets/4aa2d61a-6962-419b-974d-58ed21b55c6a)
+</details>
 
-* `myExtension.enable`: Enable/disable this extension.
-* `myExtension.thing`: Set to `blah` to do something.
+<br>
 
-## Known Issues
+<details>
+<summary>
+Through the website.
+</summary>
+<br>
 
-Calling out known issues can help limit users opening duplicate issues against your extension.
+![image](https://github.com/user-attachments/assets/74776146-d872-4f1c-835e-7d7ff275038c)
+</details>
 
-## Release Notes
+### Option 2
 
-Users appreciate release notes as you update your extension.
+Another way is to download the VSIX package file located in this repository.
 
-### 1.0.0
+<details>
+<summary>
+Then in the extensions view, click on the "View and More Actions..." button.
+</summary>
+<br>
 
-Initial release of ...
+![image](https://github.com/user-attachments/assets/2f101187-688c-4751-966b-416e4687ec4e)
+</details>
 
-### 1.0.1
+<br>
 
-Fixed issue #.
+<details>
+<summary>
+Hit the "Install from VSIX..." button.
+</summary>
+<br>
 
-### 1.1.0
+![image](https://github.com/user-attachments/assets/1758d85b-7bcb-44b6-968f-40a07ad42983)
+</details>
 
-Added features X, Y, and Z.
+<br>
 
----
+And finally choose the downloaded file.
 
-## Following extension guidelines
+## Configuration
 
-Ensure that you've read through the extensions guidelines and follow the best practices for creating your extension.
+After the extension is installed you must set these two configuration options in order for it to properly connect to a BOCA system. 
 
-* [Extension Guidelines](https://code.visualstudio.com/api/references/extension-guidelines)
+| Name | Default Value | Example | Description |
+|---|---|---|---|
+| boca.api.path | "" | https://boca.ufes.br or http://192.168.0.5:3000/api | Path of the BOCA api. |
+| boca.api.salt | "" | GG56KFJtNDBGjJprR6ex | Salt used by the BOCA api. |
 
-## Working with Markdown
+## How To Contribute
 
-You can author your README using Visual Studio Code. Here are some useful editor keyboard shortcuts:
+If you would like to help contribute to this project, please see [CONTRIBUTING](https://github.com/renato-mm/boca-vs-code-extension/blob/main/CONTRIBUTING.md).
 
-* Split the editor (`Cmd+\` on macOS or `Ctrl+\` on Windows and Linux).
-* Toggle preview (`Shift+Cmd+V` on macOS or `Shift+Ctrl+V` on Windows and Linux).
-* Press `Ctrl+Space` (Windows, Linux, macOS) to see a list of Markdown snippets.
+Before submitting a PR consider building and testing a Docker image locally and checking your code with Super-Linter:
 
-## For more information
+  ```sh
+  docker run --rm \
+             -e ACTIONS_RUNNER_DEBUG=true \
+             -e RUN_LOCAL=true \
+             --env-file ".github/super-linter.env" \
+             -v "$PWD":/tmp/lint \
+             ghcr.io/super-linter/super-linter:latest
+  ```
 
-* [Visual Studio Code's Markdown Support](http://code.visualstudio.com/docs/languages/markdown)
-* [Markdown Syntax Reference](https://help.github.com/articles/markdown-basics/)
+## License
 
-**Enjoy!**
+Copyright Universidade Federal do Espirito Santo (Ufes)
+
+This program is free software: you can redistribute it and/or modify
+it under the terms of the GNU General Public License as published by
+the Free Software Foundation, either version 3 of the License, or
+(at your option) any later version.
+
+This program is distributed in the hope that it will be useful,
+but WITHOUT ANY WARRANTY; without even the implied warranty of
+MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+GNU General Public License for more details.
+
+You should have received a copy of the GNU General Public License
+along with this program.  If not, see <https://www.gnu.org/licenses/>.
+
+This program is released under license GNU GPL v3+ license.
+
+## Support
+
+Please report any issues with _boca-vs-code-extension_ at [https://github.com/renato-mm/boca-vs-code-extension/issues](https://github.com/renato-mm/boca-vs-code-extension/issues)
