@@ -15,6 +15,9 @@
   - [Option 2](#option-2)
 - [Configuration](#configuration)
 - [How To Contribute](#how-to-contribute)
+  - [Instructions](#instructions)
+  - [Debugging](#debugging)
+    - [Requirements](#requirements)
 - [License](#license)
 - [Support](#support)
 
@@ -28,7 +31,7 @@ In order to grant access to the system, it is imperative to ascertain whether th
 This encryption process employs cryptographic hashing, which is widely regarded as a secure means of safeguarding sensitive data. Its primary objective is to thwart any attempts at password interception on untrusted connections, although it is worth noting that SSL certificate authentication may represent a more robust alternative.
 ## How To Install The Extension
 
-As it was explained before, the extension is developed for [Visual Studio Code](https://code.visualstudio.com), so in order to use it you must install it in VS Code.
+As it was explained before, the extension is developed for [Visual Studio Code](https://code.visualstudio.com), so in order to use it, you must install it in VS Code.
 
 ### Option 1
 
@@ -95,16 +98,34 @@ After the extension is installed you must set these two configuration options in
 
 If you would like to help contribute to this project, please see [CONTRIBUTING](https://github.com/renato-mm/boca-vs-code-extension/blob/main/CONTRIBUTING.md).
 
-Before submitting a PR consider building and testing a Docker image locally and checking your code with Super-Linter:
+### Instructions
 
-  ```sh
-  docker run --rm \
-             -e ACTIONS_RUNNER_DEBUG=true \
-             -e RUN_LOCAL=true \
-             --env-file ".github/super-linter.env" \
-             -v "$PWD":/tmp/lint \
-             ghcr.io/super-linter/super-linter:latest
-  ```
+1. Fork this repository
+2. Clone your forked repo
+3. Add your contributions
+4. Commit your changes and push them
+5. Create a pull request
+6. Wait for your pull request to be merged
+
+### Debugging
+
+The easiest way to test the extension is by running it in debug mode.
+
+#### Requirements
+
+- [Visual Studio Code](https://code.visualstudio.com)
+- [Node.js 20](https://nodejs.org/en/download/package-manager)
+
+Open your repository with VS Code, open `src/extension.ts`, and simply run the debugging tool. Either by pressing `F5` or running the command `Debug: Start Debugging` from the Command Pallette.
+
+<details>
+<summary>
+Command Pallette option
+</summary>
+<br>
+
+![image](https://github.com/user-attachments/assets/2b46e097-f470-4555-bc3f-0a2eaeb75095)
+</details>
 
 ## License
 
@@ -127,4 +148,4 @@ This program is released under license GNU GPL v3+ license.
 
 ## Support
 
-Please report any issues with _boca-vs-code-extension_ at [https://github.com/renato-mm/boca-vs-code-extension/issues](https://github.com/renato-mm/boca-vs-code-extension/issues)
+Please report any issues with _boca-vs-code-extension_ [here](https://github.com/renato-mm/boca-vs-code-extension/issues).

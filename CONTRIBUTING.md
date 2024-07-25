@@ -16,6 +16,17 @@ use GitHub pull requests for this purpose. Consult
 [GitHub Help](https://help.github.com/articles/about-pull-requests/) for more
 information on using pull requests.
 
+Also, before submitting a PR consider building and testing a Docker image locally and checking your code with Super-Linter:
+
+  ```sh
+  docker run --rm \
+             -e ACTIONS_RUNNER_DEBUG=true \
+             -e RUN_LOCAL=true \
+             --env-file ".github/super-linter.env" \
+             -v "$PWD":/tmp/lint \
+             ghcr.io/super-linter/super-linter:latest
+  ```
+
 ## Developer's Certificate of Origin 1.1
 
 <pre>
