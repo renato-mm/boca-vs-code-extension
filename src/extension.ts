@@ -1,9 +1,9 @@
 import * as vscode from 'vscode';
 import * as path from 'path';
 
-import { RunProvider } from './run';
 import { AuthProvider } from './auth';
 import { Entry, FileSystemProvider } from './fileExplorer';
+import { RunProvider } from './run';
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(

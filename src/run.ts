@@ -130,7 +130,8 @@ export class RunTreeItem extends vscode.TreeItem {
 		this.resourceUri = uri;
 		const message = `Run ${run.runnumber} - ${this.description}`;
 		this.command = { command: 'runs.selectRun', title: "Select Run", arguments: [this.resourceUri, message] };
-		treeFileDecorationProvider.updateRunDecorator(this.resourceUri, run.runanswer === 1, this.description);
+		const solved = Boolean(answer?.yes);
+		treeFileDecorationProvider.updateRunDecorator(this.resourceUri, solved, this.description);
 	}
 
 	iconPath = {
