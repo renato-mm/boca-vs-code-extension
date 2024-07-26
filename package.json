@@ -126,12 +126,12 @@
         {
           "command": "bocaExplorer.submitRun",
           "group": "1_boca",
-          "when": "!explorerResourceIsFolder"
+          "when": "resourceDirname in boca.problemsPaths"
         },
         {
           "command": "bocaExplorer.selectProblem",
           "group": "1_boca",
-          "when": "explorerResourceIsFolder"
+          "when": "resourcePath in boca.problemsPaths"
         }
       ],
       "view/context": [

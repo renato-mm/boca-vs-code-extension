@@ -401,9 +401,11 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 					authorization: 'Bearer ' + accessToken
 				}
 			});
+			const problemsPaths: Array<string> = [];
 			for (let problem of (response.data || [])) {
 				if (!problem.fake) {
 					problem.problemuri = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contestName, problem.problemname));
+					problemsPaths.push(problem.problemuri.fsPath);
 					contest?.problems.set(problem.problemname, { problem, runs: new Map() });
 					await this._getRuns(contestNumber, contestName, problem.problemnumber, problem.problemname);
 					const runs = contest?.problems.get(problem.problemname)?.runs;
@@ -411,6 +413,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 					treeFileDecorationProvider.updateProblemDecorator(problem.problemuri, solved, problem.problemcolorname!.toLowerCase());
 				}
 			}
+			vscode.commands.executeCommand('setContext', 'boca.problemsPaths', problemsPaths);
 		} catch (error) {
 			vscode.window.showErrorMessage('Fetching problems failed');
 			console.error(error);
