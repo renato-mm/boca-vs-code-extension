@@ -110,6 +110,7 @@ export class FileStat implements vscode.FileStat {
 }
 
 export interface Entry {
+	bocaTreeUri: vscode.Uri;
 	uri: vscode.Uri;
 	type: vscode.FileType;
 	exists?: boolean;
@@ -181,6 +182,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 					const contest = this._contests.get(contestName);
 					if (contest) {
 						for (let [problemName, { problem, runs }] of contest.problems) {
+							const bocaTreeUri = vscode.Uri.file(path.join(element.bocaTreeUri.path, problemName));
 							const uri = vscode.Uri.file(path.join(element.uri.fsPath, problemName));
 							let exists = fs.existsSync(uri.fsPath);
 							if (exists) {
@@ -189,6 +191,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 							}
 							const solved = [...(runs.values() || [])].some(run => run.runanswer === 1);
 							children.push({
+								bocaTreeUri,
 								uri,
 								type: vscode.FileType.Directory,
 								exists,
@@ -197,8 +200,6 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 								problemNumber: problem.problemnumber,
 								solved
 							});
-							treeFileDecorationProvider.syncDecorator(uri, exists);
-							treeFileDecorationProvider.updateProblemDecorator(uri, solved, problem.problemcolorname!.toLowerCase());
 						}
 					}
 					break;
@@ -207,6 +208,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 					const { base: problemName, dir } = path.parse(element.uri.fsPath);
 					const { problem } = this._contests.get(path.parse(dir).base)?.problems.get(problemName) || {};
 					if (problem?.probleminputfilename) {
+						const bocaTreeUri = vscode.Uri.file(path.join(element.bocaTreeUri.path, problem.probleminputfilename));
 						const uri = vscode.Uri.file(path.join(element.uri.fsPath, problem.probleminputfilename));
 						let exists = fs.existsSync(uri.fsPath);
 						if (exists) {
@@ -214,6 +216,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 							exists = stat.isFile();
 						}
 						children.push({
+							bocaTreeUri,
 							uri,
 							type: vscode.FileType.File,
 							exists,
@@ -221,38 +224,36 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 							contestNumber: problem.contestnumber,
 							problemNumber: problem.problemnumber,
 						});
-						treeFileDecorationProvider.syncDecorator(uri, exists);
 					}
 					break;
 			}
 		}
 		else {
-			await this._getContests();
-			const currentChildren = await this.readDirectory(this._workspaceFolder.uri);
 			for (let [contestName, { contest }] of this._contests) {
-				const currentChild = currentChildren.find(child => child[0] === contestName);
+				const bocaTreeUri = vscode.Uri.file(contestName);
 				const uri = vscode.Uri.file(path.join(this._workspaceFolder.uri.fsPath, contestName));
-				const exists = Boolean(currentChild);
+				let exists = fs.existsSync(uri.fsPath);
+				if (exists) {
+					const stat = fs.statSync(uri.fsPath);
+					exists = stat.isDirectory();
+				}
 				children.push({
+					bocaTreeUri,
 					uri,
-					type: currentChild?.[1] ?? vscode.FileType.Directory,
+					type: vscode.FileType.Directory,
 					exists,
 					contextValue: 'contest',
 					contestNumber: contest.contestnumber,
 				});
-				treeFileDecorationProvider.syncDecorator(uri, exists);
 			}
 		}
 		return children;
 	}
 
 	getTreeItem(element: Entry): vscode.TreeItem {
-		const treeItem = new vscode.TreeItem(element.uri, element.type === vscode.FileType.Directory ? vscode.TreeItemCollapsibleState.Collapsed : vscode.TreeItemCollapsibleState.None);
-		treeItem.tooltip = path.basename(element.uri.path);
-		treeItem.contextValue = element.contextValue || 'file';
-		if (element.contextValue === 'problem') {
-			treeItem.command = { command: 'bocaExplorer.selectProblem', title: "Select Problem", arguments: [element.contestNumber, element.problemNumber], };
-		}
+		const treeItem = new vscode.TreeItem(element.bocaTreeUri, Number(element.type === vscode.FileType.Directory));
+		treeFileDecorationProvider.syncDecorator(element.bocaTreeUri, Boolean(element.exists));
+		treeItem.tooltip = element.bocaTreeUri.path.slice(1);
 		return treeItem;
 	}
 
