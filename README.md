@@ -1,5 +1,7 @@
 # :balloon: boca-vs-code-extension
 
+A Visual Studio Code extension for BOCA's teams.
+
 [![Google_Groups][groups_badge]][groups_link]
 
 [close_stale_workflow_badge]: https://img.shields.io/github/actions/workflow/status/renato-mm/boca-vs-code-extension/close-stale.yml?label=close%20stale&logo=github
@@ -10,6 +12,7 @@
 ## Table of Contents
 
 - [What Is BOCA?](#what-is-boca)
+- [Features](#features)
 - [How To Install The Extension](#how-to-install-the-extension)
   - [Option 1](#option-1)
   - [Option 2](#option-2)
@@ -27,11 +30,26 @@ The BOCA Online Contest Administrator, commonly referred to as BOCA, is a robust
 BOCA represents a powerful tool for streamlining the administration of programming contests, making it a valuable asset for contest organizers and participants.
 For more in-depth information, please visit the official repository at [https://github.com/cassiopc/boca](https://github.com/cassiopc/boca).
 
-In order to grant access to the system, it is imperative to ascertain whether the user attempting to connect possesses the necessary credentials. At present, BOCA's sole authentication method mandates that a user's provided password undergo encryption before transmission across the connection and storage in the database.
-This encryption process employs cryptographic hashing, which is widely regarded as a secure means of safeguarding sensitive data. Its primary objective is to thwart any attempts at password interception on untrusted connections, although it is worth noting that SSL certificate authentication may represent a more robust alternative.
+The system's main users are the admins and the teams. An admin is responsible to create a contest and its problems. A team can join a contest, view/download its problems, submit a file for run and view the runs alongside with its files.
+
+## Features
+
+The BOCA VS Code extension aims to simplify the use of BOCA system by teams. With it they can:
+
+- View the contests they are participating;
+- View the problems and download its file(s);
+- Submit a file for run;
+- View the runs and also open the files submitted for it.
+
+To sum up, the extension reduces the need of a team to be switching between application in order to use BOCA system.
+
+This work started as part of the undergraduate final year project carried out by Renato Menezes Machado under supervision of Prof. Dr. Rodrigo Laiola Guimarães at Universidade Federal do Espirito Santo ([UFES](https://www.ufes.br/)).
+
 ## How To Install The Extension
 
 As it was explained before, the extension is developed for [Visual Studio Code](https://code.visualstudio.com), so in order to use it, you must install it in VS Code.
+
+> **_Note:_** It is necessary to reload the VS Code window after installation for the extension's colors to work properly.
 
 ### Option 1
 
