@@ -41,7 +41,7 @@ The BOCA VS Code extension aims to simplify the use of BOCA system by teams. Wit
 - Submit a file for run;
 - View the runs and also open the files submitted for it.
 
-To sum up, the extension reduces the need of a team to be switching between application in order to use BOCA system.
+As a result, the extension reduces the need of a team to be switching between applications in order to use BOCA system.
 
 This work started as part of the undergraduate final year project carried out by Renato Menezes Machado under supervision of Prof. Dr. Rodrigo Laiola Guimarães at Universidade Federal do Espirito Santo ([UFES](https://www.ufes.br/)).
 
