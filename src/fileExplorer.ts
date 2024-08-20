@@ -288,7 +288,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 		form.append('data', JSON.stringify(body));
 		form.append('runfile', fs.createReadStream(resource.fsPath));
 		try {
-			const response = await axios<Run>({
+			const { data: { runnumber } } = await axios<Run>({
 				method: 'post',
 				url: apiUri + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
 				data: form,
@@ -297,7 +297,6 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 					...form.getHeaders()
 				}
 			});
-			const { data: { runnumber } } = response;
 			vscode.window.showInformationMessage(`Run ${runnumber} successfully submitted`);
 		} catch (error) {
 			vscode.window.showErrorMessage('Submiting run failed');
