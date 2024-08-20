@@ -7,8 +7,8 @@ import { RunProvider } from './run';
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(
-		'bocaExplorer.openApiPathSetting',
-		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.path')
+		'bocaExplorer.openApiUriSetting',
+		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.uri')
 	);
 	vscode.commands.registerCommand(
 		'bocaExplorer.openApiSaltSetting',
@@ -37,8 +37,8 @@ export async function activate(context: vscode.ExtensionContext) {
 
 	vscode.workspace.onDidChangeConfiguration(event => {
 		if (event.affectsConfiguration('boca.api')) {
-			const { path: apiPath, salt: apiSalt } = vscode.workspace.getConfiguration().get<any>('boca.api');
-			if (!!apiPath && !!apiSalt) {
+			const { uri: apiUri, salt: apiSalt } = vscode.workspace.getConfiguration().get<any>('boca.api');
+			if (!!apiUri && !!apiSalt) {
 				fileSystemProvider.refresh();
 			}
 		}

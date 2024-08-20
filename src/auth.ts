@@ -10,13 +10,13 @@ export class AuthProvider {
 	}
 
 	async login(username: string, password: string): Promise<string> {
-		const { path: apiPath, salt: apiSalt } = workspace.getConfiguration().get<any>('boca.api');
+		const { uri: apiUri, salt: apiSalt } = workspace.getConfiguration().get<any>('boca.api');
     const hashedPassword = createHash("sha256").update(password).digest("hex");
     const saltedPassword = createHash("sha256").update(hashedPassword + apiSalt).digest("hex");
 		try {
 			const response = await axios({
 				method: 'get',
-				url: `${apiPath}/token?name=${username}&password=${saltedPassword}`
+				url: `${apiUri}/token?name=${username}&password=${saltedPassword}`
 			});
 			commands.executeCommand('setContext', 'boca.showSignInView', false);
 			return response.data.accessToken || '';

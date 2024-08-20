@@ -282,7 +282,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 		const usernumber = 1001;
 		const runlangnumber = 1;
 		const body = { runsitenumber, usernumber, rundate, runlangnumber, rundatediff };
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		const form = new FormData();
 		form.append('data', JSON.stringify(body));
@@ -290,7 +290,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 		try {
 			const response = await axios<Run>({
 				method: 'post',
-				url: apiPath + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
+				url: apiUri + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
 				data: form,
 				headers: {
 					authorization: 'Bearer ' + accessToken,
@@ -361,12 +361,12 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 	}
 
 	private async _getContests(): Promise<void> {
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios<Array<Contest>>({
 				method: 'get',
-				url: apiPath + '/contest',
+				url: apiUri + '/contest',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
@@ -392,12 +392,12 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 
 	private async _getProblems(contestNumber: number, contestName: string): Promise<void> {
 		const contest = this._contests.get(contestName);
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios<Array<Problem>>({
 				method: 'get',
-				url: apiPath + '/contest/' + contestNumber + '/problem',
+				url: apiUri + '/contest/' + contestNumber + '/problem',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
@@ -431,7 +431,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 				}
 			}
 		}
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		const tempFolderPath = path.join(this._folderPath, problem.contestnumber.toString(), problem.problemname, 'temp');
 		await this.createDirectory(vscode.Uri.file(tempFolderPath));
@@ -441,7 +441,7 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 		return new Promise((resolve, reject) => {
 			axios({
 				method: 'get',
-				url: apiPath + '/contest/' + problem.contestnumber + '/problem/' + problem.problemnumber + '/file',
+				url: apiUri + '/contest/' + problem.contestnumber + '/problem/' + problem.problemnumber + '/file',
 				responseType: 'stream',
 				headers: {
 					authorization: 'Bearer ' + accessToken
@@ -473,12 +473,12 @@ export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
 	private async _getRuns(contestNumber: number, contestName: string, problemNumber: number, problemName: string): Promise<void> {
 		const contest = this._contests.get(contestName);
 		const problem = contest?.problems.get(problemName);
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios<Array<Run>>({
 				method: 'get',
-				url: apiPath + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
+				url: apiUri + '/contest/' + contestNumber + '/problem/' + problemNumber + '/run',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}

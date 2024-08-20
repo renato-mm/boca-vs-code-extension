@@ -37,8 +37,8 @@
       },
       {
         "view": "settings",
-        "contents": "You have to add an API path configuration.\n[Open this configuration](command:bocaExplorer.openApiPathSetting)",
-        "when": "!config.boca.api.path"
+        "contents": "You have to add an API uri configuration.\n[Open this configuration](command:bocaExplorer.openApiUriSetting)",
+        "when": "!config.boca.api.uri"
       },
       {
         "view": "settings",
@@ -52,7 +52,7 @@
           "id": "runs",
           "name": "Runs",
           "contextualTitle": "BOCA",
-          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
+          "when": "!boca.showSignInView && config.boca.api.uri && config.boca.api.salt"
         }
       ],
       "boca-file-explorer": [
@@ -66,13 +66,13 @@
           "id": "settings",
           "name": "Settings",
           "contextualTitle": "BOCA",
-          "when": "!config.boca.api.path || !config.boca.api.salt"
+          "when": "!config.boca.api.uri || !config.boca.api.salt"
         },
         {
           "id": "bocaExplorer",
           "name": "Boca Explorer",
           "contextualTitle": "BOCA",
-          "when": "!boca.showSignInView && config.boca.api.path && config.boca.api.salt"
+          "when": "!boca.showSignInView && config.boca.api.uri && config.boca.api.salt"
         }
       ]
     },
@@ -230,11 +230,11 @@
     "configuration": {
       "title": "BOCA",
       "properties": {
-        "boca.api.path": {
+        "boca.api.uri": {
           "type": "string",
           "default": "",
           "format": "uri",
-          "description": "Path of the BOCA api."
+          "description": "Uri of the BOCA api."
         },
         "boca.api.salt": {
           "type": "string",

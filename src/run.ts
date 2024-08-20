@@ -44,12 +44,12 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 		if (this._contestNumber === 0 || this._problemNumber === 0) {
 			return [];
 		}
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios<Array<Run>>({
 				method: 'get',
-				url: apiPath + '/contest/' + this._contestNumber + '/problem/' + this._problemNumber + '/run',
+				url: apiUri + '/contest/' + this._contestNumber + '/problem/' + this._problemNumber + '/run',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
@@ -75,12 +75,12 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 	}
 
 	private async _getAnswers() {
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		try {
 			const response = await axios<Array<Answer>>({
 				method: 'get',
-				url: apiPath + '/contest/' + this._contestNumber + '/answer',
+				url: apiUri + '/contest/' + this._contestNumber + '/answer',
 				headers: {
 					authorization: 'Bearer ' + accessToken
 				}
@@ -93,14 +93,14 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 	}
 
 	private async _downloadRunFile(run: Run, runFolderPath: string): Promise<void> {
-		const apiPath = vscode.workspace.getConfiguration().get<string>('boca.api.path');
+		const apiUri = vscode.workspace.getConfiguration().get<string>('boca.api.uri');
 		const accessToken = this.context.globalState.get<string>('accessToken');
 		const runFilePath = path.join(runFolderPath, run.runfilename);
 		const writer = fs.createWriteStream(runFilePath);
 		return new Promise((resolve, reject) => {
 			axios({
 				method: 'get',
-				url: apiPath + '/contest/' + run.contestnumber + '/problem/' + run.runproblem + '/run/' + run.runnumber + '/file',
+				url: apiUri + '/contest/' + run.contestnumber + '/problem/' + run.runproblem + '/run/' + run.runnumber + '/file',
 				responseType: 'stream',
 				headers: {
 					authorization: 'Bearer ' + accessToken

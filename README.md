@@ -109,7 +109,7 @@ After the extension is installed you must set these two configuration options in
 
 | Name | Default Value | Example | Description |
 |---|---|---|---|
-| boca.api.path | "" | https://boca.ufes.br or http://192.168.0.5:3000/api | Path of the BOCA api. |
+| boca.api.uri | "" | https://boca.ufes.br or http://192.168.0.5:3000/api | Uri of the BOCA api. |
 | boca.api.salt | "" | GG56KFJtNDBGjJprR6ex | Salt used by the BOCA api. |
 
 ## How To Contribute
