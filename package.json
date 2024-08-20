@@ -32,17 +32,17 @@
     "viewsWelcome": [
       {
         "view": "signIn",
-        "contents": "You have to sign in to use this extension.\n[Sign In](command:bocaExplorer.signIn)",
+        "contents": "You have to sign in to use this extension.\n[Sign In](command:boca.signIn)",
         "when": "boca.showSignInView"
       },
       {
         "view": "settings",
-        "contents": "You have to add an API uri configuration.\n[Open this configuration](command:bocaExplorer.openApiUriSetting)",
+        "contents": "You have to add an API uri configuration.\n[Open this configuration](command:boca.openApiUriSetting)",
         "when": "!config.boca.api.uri"
       },
       {
         "view": "settings",
-        "contents": "You have to add an API salt configuration.\n[Open this configuration](command:bocaExplorer.openApiSaltSetting)",
+        "contents": "You have to add an API salt configuration.\n[Open this configuration](command:boca.openApiSaltSetting)",
         "when": "!config.boca.api.salt"
       }
     ],
@@ -69,7 +69,7 @@
           "when": "!config.boca.api.uri || !config.boca.api.salt"
         },
         {
-          "id": "bocaExplorer",
+          "id": "bocaTree",
           "name": "Boca Explorer",
           "contextualTitle": "BOCA",
           "when": "!boca.showSignInView && config.boca.api.uri && config.boca.api.salt"
@@ -78,11 +78,11 @@
     },
     "commands": [
       {
-        "command": "bocaExplorer.signOut",
+        "command": "boca.signOut",
         "title": "Sign Out"
       },
       {
-        "command": "bocaExplorer.refreshEntry",
+        "command": "boca.refreshEntry",
         "title": "Refresh",
         "icon": {
           "light": "resources/light/refresh.svg",
@@ -90,7 +90,7 @@
         }
       },
       {
-        "command": "bocaExplorer.synchronizeAll",
+        "command": "boca.synchronizeAll",
         "title": "Synchronize",
         "icon": {
           "light": "resources/light/sync.svg",
@@ -98,7 +98,7 @@
         }
       },
       {
-        "command": "bocaExplorer.synchronize",
+        "command": "boca.synchronize",
         "title": "Synchronize",
         "icon": {
           "light": "resources/light/sync.svg",
@@ -106,7 +106,7 @@
         }
       },
       {
-        "command": "bocaExplorer.submitRun",
+        "command": "boca.submitRun",
         "title": "Submit File to Run",
         "icon": {
           "light": "resources/light/file-symlink-file.svg",
@@ -114,7 +114,7 @@
         }
       },
       {
-        "command": "bocaExplorer.selectProblem",
+        "command": "boca.selectProblem",
         "title": "Select Problem"
       },
       {
@@ -125,46 +125,46 @@
     "menus": {
       "explorer/context": [
         {
-          "command": "bocaExplorer.submitRun",
+          "command": "boca.submitRun",
           "group": "1_boca",
           "when": "!explorerResourceIsFolder && resourceDirname in boca.problemsPaths"
         },
         {
-          "command": "bocaExplorer.selectProblem",
+          "command": "boca.selectProblem",
           "group": "1_boca",
           "when": "explorerResourceIsFolder && resourcePath in boca.problemsPaths"
         }
       ],
       "view/context": [
         {
-          "command": "bocaExplorer.refreshEntry",
-          "when": "view == bocaExplorer"
+          "command": "boca.refreshEntry",
+          "when": "view == bocaTree"
         }
       ],
       "view/title": [
         {
-          "command": "bocaExplorer.refreshEntry",
-          "when": "view == bocaExplorer",
+          "command": "boca.refreshEntry",
+          "when": "view == bocaTree",
           "group": "navigation"
         },
         {
-          "command": "bocaExplorer.synchronizeAll",
-          "when": "view == bocaExplorer",
+          "command": "boca.synchronizeAll",
+          "when": "view == bocaTree",
           "group": "navigation"
         },
         {
-          "command": "bocaExplorer.signOut",
-          "when": "view == bocaExplorer"
+          "command": "boca.signOut",
+          "when": "view == bocaTree"
         }
       ],
       "view/item/context": [
         {
-          "command": "bocaExplorer.synchronize",
-          "when": "view == bocaExplorer"
+          "command": "boca.synchronize",
+          "when": "view == bocaTree"
         },
         {
-          "command": "bocaExplorer.synchronize",
-          "when": "view == bocaExplorer",
+          "command": "boca.synchronize",
+          "when": "view == bocaTree",
           "group": "inline"
         }
       ]
@@ -187,7 +187,7 @@
         }
       },
       {
-        "id": "bocaExplorer.blue",
+        "id": "boca.blue",
         "description": "Color for blue balloon problem",
         "defaults": {
           "dark": "#A8E7F0",
@@ -195,7 +195,7 @@
         }
       },
       {
-        "id": "bocaExplorer.orange",
+        "id": "boca.orange",
         "description": "Color for orange balloon problem",
         "defaults": {
           "dark": "#F4D199",
@@ -203,7 +203,7 @@
         }
       },
       {
-        "id": "bocaExplorer.green",
+        "id": "boca.green",
         "description": "Color for green balloon problem",
         "defaults": {
           "dark": "#C6EC87",
@@ -211,7 +211,7 @@
         }
       },
       {
-        "id": "bocaExplorer.red",
+        "id": "boca.red",
         "description": "Color for red balloon problem",
         "defaults": {
           "dark": "#FE7269",
@@ -219,7 +219,7 @@
         }
       },
       {
-        "id": "bocaExplorer.pink",
+        "id": "boca.pink",
         "description": "Color for pink balloon problem",
         "defaults": {
           "dark": "#FEBAE7",

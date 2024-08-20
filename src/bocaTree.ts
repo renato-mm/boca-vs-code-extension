@@ -123,7 +123,7 @@ export interface Entry {
 
 //#endregion
 
-export class FileSystemProvider implements vscode.TreeDataProvider<Entry> {
+export class BocaTreeProvider implements vscode.TreeDataProvider<Entry> {
 	private _contests: Map<string, { contest: Contest; problems: Map<string, { problem: Problem; runs: Map<number, Run>; }>; }>;
 	private _workspaceFolder: vscode.WorkspaceFolder;
 	private _folderPath: string;

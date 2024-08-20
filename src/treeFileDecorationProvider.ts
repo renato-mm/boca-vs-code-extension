@@ -16,7 +16,7 @@ class TreeFileDecorationProvider implements FileDecorationProvider {
 	private _fileDecorations: Map<string, FileDecoration> = new Map<string, FileDecoration>();
 	private _unsynchronizedDecorator: FileDecoration = {
 		badge: '⚠',
-		color: new ThemeColor('bocaExplorer.red'),
+		color: new ThemeColor('boca.red'),
 		tooltip: 'Unsynchronized'
 	}; 
 
@@ -40,7 +40,7 @@ class TreeFileDecorationProvider implements FileDecorationProvider {
 	updateProblemDecorator(resourceUri: Uri, solved: boolean, color: string): void {
 		const decorator: FileDecoration = {
 			badge: solved ? '⚑' : '⚐',
-			color: new ThemeColor(`bocaExplorer.${color}`)
+			color: new ThemeColor(`boca.${color}`)
 		};
 		const currrentDecorator = this._fileDecorations.get(resourceUri.toString());
 		if (currrentDecorator?.badge !== decorator.badge) {

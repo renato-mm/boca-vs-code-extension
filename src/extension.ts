@@ -2,16 +2,16 @@ import * as vscode from 'vscode';
 import * as path from 'path';
 
 import { AuthProvider } from './auth';
-import { Entry, FileSystemProvider } from './fileExplorer';
+import { Entry, BocaTreeProvider } from './bocaTree';
 import { RunProvider } from './run';
 
 export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand(
-		'bocaExplorer.openApiUriSetting',
+		'boca.openApiUriSetting',
 		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.uri')
 	);
 	vscode.commands.registerCommand(
-		'bocaExplorer.openApiSaltSetting',
+		'boca.openApiSaltSetting',
 		() => vscode.commands.executeCommand('workbench.action.openSettings', 'boca.api.salt')
 	);
 	// Overwrite entire parent setting
@@ -25,12 +25,12 @@ export async function activate(context: vscode.ExtensionContext) {
 	await vscode.commands.executeCommand('setContext', 'boca.showSignInView', !hasAccessToken);
 
 	const authProvider = new AuthProvider();
-	vscode.commands.registerCommand('bocaExplorer.signIn', async () => {
+	vscode.commands.registerCommand('boca.signIn', async () => {
 		const accessToken = await authProvider.signIn();
 		context.globalState.update('accessToken', accessToken);
-		fileSystemProvider.refresh();
+		bocaTreeProvider.refresh();
 	});
-	vscode.commands.registerCommand('bocaExplorer.signOut', async () => {
+	vscode.commands.registerCommand('boca.signOut', async () => {
 		context.globalState.update('accessToken', null);
 		await vscode.commands.executeCommand('setContext', 'boca.showSignInView', true);
 	});
@@ -39,33 +39,33 @@ export async function activate(context: vscode.ExtensionContext) {
 		if (event.affectsConfiguration('boca.api')) {
 			const { uri: apiUri, salt: apiSalt } = vscode.workspace.getConfiguration().get<any>('boca.api');
 			if (!!apiUri && !!apiSalt) {
-				fileSystemProvider.refresh();
+				bocaTreeProvider.refresh();
 			}
 		}
 	});
 
-	const fileSystemProvider = new FileSystemProvider(context);
+	const bocaTreeProvider = new BocaTreeProvider(context);
 	if (hasAccessToken) {
-		await fileSystemProvider.refresh();
+		await bocaTreeProvider.refresh();
 	}
-	vscode.window.registerTreeDataProvider('bocaExplorer', fileSystemProvider);
-	vscode.commands.registerCommand('bocaExplorer.refreshEntry', () => fileSystemProvider.refresh());
-	vscode.commands.registerCommand('bocaExplorer.synchronizeAll', () => fileSystemProvider.synchronize());
-	vscode.commands.registerCommand('bocaExplorer.synchronize', (entry?: Entry) => fileSystemProvider.synchronize(entry));
+	vscode.window.registerTreeDataProvider('bocaTree', bocaTreeProvider);
+	vscode.commands.registerCommand('boca.refreshEntry', () => bocaTreeProvider.refresh());
+	vscode.commands.registerCommand('boca.synchronizeAll', () => bocaTreeProvider.synchronize());
+	vscode.commands.registerCommand('boca.synchronize', (entry?: Entry) => bocaTreeProvider.synchronize(entry));
 
 	const runProvider = new RunProvider(context);
 	vscode.window.registerTreeDataProvider('runs', runProvider);
 	
-	vscode.commands.registerCommand('bocaExplorer.selectProblem', async (resource: vscode.Uri) => {
+	vscode.commands.registerCommand('boca.selectProblem', async (resource: vscode.Uri) => {
 		const { base: problemName, dir } = path.parse(resource.fsPath);
 		const contestName = path.parse(dir).base;
-		const contestNumber = fileSystemProvider.getContestNumber(contestName);
-		const problemNumber = fileSystemProvider.getProblemNumber(contestName, problemName);
+		const contestNumber = bocaTreeProvider.getContestNumber(contestName);
+		const problemNumber = bocaTreeProvider.getProblemNumber(contestName, problemName);
 		await runProvider.refresh(contestNumber, problemNumber);
 	});
 	
-	vscode.commands.registerCommand('bocaExplorer.submitRun', (resource: vscode.Uri) => {
-		fileSystemProvider.submitRun(resource);
+	vscode.commands.registerCommand('boca.submitRun', (resource: vscode.Uri) => {
+		bocaTreeProvider.submitRun(resource);
 	});
 	
 	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {
