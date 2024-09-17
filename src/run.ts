@@ -17,7 +17,7 @@ export class RunProvider implements vscode.TreeDataProvider<RunTreeItem> {
 	readonly onDidChangeTreeData: vscode.Event<RunTreeItem | undefined | void> = this._onDidChangeTreeData.event;
 
 	constructor(private context: vscode.ExtensionContext) {
-		this._folderPath = path.join(context.storageUri!.fsPath, '..', 'boca-extension');
+		this._folderPath = context.globalStorageUri.fsPath;
 		const runsPath = path.join(this._folderPath, 'Runs');
 		if (!fs.existsSync(runsPath)) {
 			fs.mkdirSync(runsPath, { recursive: true });

@@ -11,8 +11,6 @@ import FormData = require('form-data');
 
 const finished = promisify(stream.finished);
 
-//#region Utilities
-
 namespace _ {
 
 	function handleResult<T>(resolve: (result: T) => void, reject: (error: Error) => void, error: Error | null | undefined, result: T): void {
@@ -43,69 +41,10 @@ namespace _ {
 		return error;
 	}
 
-	export function normalizeNFC(items: string): string;
-	export function normalizeNFC(items: string[]): string[];
-	export function normalizeNFC(items: string | string[]): string | string[] {
-		if (process.platform !== 'darwin') {
-			return items;
-		}
-
-		if (Array.isArray(items)) {
-			return items.map(item => item.normalize('NFC'));
-		}
-
-		return items.normalize('NFC');
-	}
-
-	export function readdir(path: string): Promise<string[]> {
-		return new Promise<string[]>((resolve, reject) => {
-			fs.readdir(path, (error, children) => handleResult(resolve, reject, error, normalizeNFC(children)));
-		});
-	}
-
-	export function stat(path: string): Promise<fs.Stats> {
-		return new Promise<fs.Stats>((resolve, reject) => {
-			fs.stat(path, (error, stat) => handleResult(resolve, reject, error, stat));
-		});
-	}
-
 	export function mkdir(path: string): Promise<void> {
 		return new Promise<void>((resolve, reject) => {
 			mkdirp(path, error => handleResult(resolve, reject, error, void 0));
 		});
-	}
-}
-
-export class FileStat implements vscode.FileStat {
-
-	constructor(private fsStat: fs.Stats) { }
-
-	get type(): vscode.FileType {
-		return this.fsStat.isFile() ? vscode.FileType.File : this.fsStat.isDirectory() ? vscode.FileType.Directory : this.fsStat.isSymbolicLink() ? vscode.FileType.SymbolicLink : vscode.FileType.Unknown;
-	}
-
-	get isFile(): boolean | undefined {
-		return this.fsStat.isFile();
-	}
-
-	get isDirectory(): boolean | undefined {
-		return this.fsStat.isDirectory();
-	}
-
-	get isSymbolicLink(): boolean | undefined {
-		return this.fsStat.isSymbolicLink();
-	}
-
-	get size(): number {
-		return this.fsStat.size;
-	}
-
-	get ctime(): number {
-		return this.fsStat.ctime.getTime();
-	}
-
-	get mtime(): number {
-		return this.fsStat.mtime.getTime();
 	}
 }
 
@@ -121,8 +60,6 @@ export interface Entry {
 	contestNumber?: number;
 }
 
-//#endregion
-
 export class BocaTreeProvider implements vscode.TreeDataProvider<Entry> {
 	private _contests: Map<string, { contest: Contest; problems: Map<string, { problem: Problem; runs: Map<number, Run>; }>; }>;
 	private _workspaceFolder: vscode.WorkspaceFolder;
@@ -134,7 +71,7 @@ export class BocaTreeProvider implements vscode.TreeDataProvider<Entry> {
 	constructor(private context: vscode.ExtensionContext) {
 		this._contests = new Map();
 		this._workspaceFolder = (vscode.workspace.workspaceFolders ?? []).filter(folder => folder.uri.scheme === 'file')[0];
-		this._folderPath = path.join(context.storageUri!.fsPath, '..', 'boca-extension');
+		this._folderPath = context.globalStorageUri.fsPath;
 		_.mkdir(this._folderPath);
 	}
 
@@ -145,32 +82,9 @@ export class BocaTreeProvider implements vscode.TreeDataProvider<Entry> {
 		}
 	}
 
-	async _stat(path: string): Promise<vscode.FileStat> {
-		return new FileStat(await _.stat(path));
-	}
-
-	readDirectory(uri: vscode.Uri): [string, vscode.FileType][] | Thenable<[string, vscode.FileType][]> {
-		return this._readDirectory(uri);
-	}
-
-	async _readDirectory(uri: vscode.Uri): Promise<[string, vscode.FileType][]> {
-		const children = await _.readdir(uri.fsPath);
-
-		const result: [string, vscode.FileType][] = [];
-		for (let i = 0; i < children.length; i++) {
-			const child = children[i];
-			const stat = await this._stat(path.join(uri.fsPath, child));
-			result.push([child, stat.type]);
-		}
-
-		return Promise.resolve(result);
-	}
-
 	createDirectory(uri: vscode.Uri): void | Thenable<void> {
 		return _.mkdir(uri.fsPath);
 	}
-
-	// tree data provider
 
 	async getChildren(element?: Entry): Promise<Entry[]> {
 		const children: Entry[] = [];
