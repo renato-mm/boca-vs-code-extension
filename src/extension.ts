@@ -52,6 +52,7 @@ export async function activate(context: vscode.ExtensionContext) {
 	vscode.commands.registerCommand('boca.refreshEntry', () => bocaTreeProvider.refresh());
 	vscode.commands.registerCommand('boca.synchronizeAll', () => bocaTreeProvider.synchronize());
 	vscode.commands.registerCommand('boca.synchronize', (entry?: Entry) => bocaTreeProvider.synchronize(entry));
+	vscode.commands.registerCommand('boca.submitRun', (resource: vscode.Uri) => bocaTreeProvider.submitRun(resource));
 
 	const runProvider = new RunProvider(context);
 	vscode.window.registerTreeDataProvider('runs', runProvider);
@@ -64,11 +65,7 @@ export async function activate(context: vscode.ExtensionContext) {
 		await runProvider.refresh(contestNumber, problemNumber);
 	});
 	
-	vscode.commands.registerCommand('boca.submitRun', (resource: vscode.Uri) => {
-		bocaTreeProvider.submitRun(resource);
-	});
-	
-	vscode.commands.registerCommand('runs.selectRun', (resource: vscode.Uri, message: string) => {
+	vscode.commands.registerCommand('boca.selectRun', (resource: vscode.Uri, message: string) => {
 		vscode.window.showTextDocument(resource);
 		outputChannel.appendLine(message);
 		outputChannel.show();

@@ -3,7 +3,7 @@
   "name": "boca",
   "publisher": "ufes",
   "displayName": "BOCA",
-  "description": "",
+  "description": "A Visual Studio Code extension for BOCA's teams",
   "license": "GNU General Public License v3.0",
   "repository": {
     "type": "git",
@@ -118,7 +118,7 @@
         "title": "Select Problem"
       },
       {
-        "command": "runs.selectRun",
+        "command": "boca.selectRun",
         "title": "Select Run"
       }
     ],
@@ -171,7 +171,7 @@
     },
     "colors": [
       {
-        "id": "runs.correctAnswer",
+        "id": "boca.correctAnswer",
         "description": "Color for a correct run",
         "defaults": {
           "dark": "terminal.ansiBrightGreen",
@@ -179,7 +179,7 @@
         }
       },
       {
-        "id": "runs.incorrectAnswer",
+        "id": "boca.incorrectAnswer",
         "description": "Color for a incorrect run",
         "defaults": {
           "dark": "terminal.ansiBrightRed",

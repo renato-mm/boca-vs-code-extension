@@ -129,7 +129,7 @@ export class RunTreeItem extends vscode.TreeItem {
 		this.description = answer?.runanswer || '';
 		this.resourceUri = uri;
 		const message = `Run ${run.runnumber} - ${this.description}`;
-		this.command = { command: 'runs.selectRun', title: "Select Run", arguments: [this.resourceUri, message] };
+		this.command = { command: 'boca.selectRun', title: "Select Run", arguments: [this.resourceUri, message] };
 		const solved = Boolean(answer?.yes);
 		treeFileDecorationProvider.updateRunDecorator(this.resourceUri, solved, this.description);
 	}

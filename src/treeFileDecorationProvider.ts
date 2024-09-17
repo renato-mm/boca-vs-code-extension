@@ -53,12 +53,12 @@ class TreeFileDecorationProvider implements FileDecorationProvider {
 		const decorator: FileDecoration = solved
 			? {
 				badge: '✓',
-				color: new ThemeColor('runs.correctAnswer'),
+				color: new ThemeColor('boca.correctAnswer'),
 				tooltip
 			}
 			: {
 				badge: '☓',
-				color: new ThemeColor('runs.incorrectAnswer'),
+				color: new ThemeColor('boca.incorrectAnswer'),
 				tooltip
 			};
 		const currrentDecorator = this._fileDecorations.get(resourceUri.toString());
