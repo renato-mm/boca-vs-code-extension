@@ -131,8 +131,22 @@ The easiest way to test the extension is by running it in debug mode.
 
 - [Visual Studio Code](https://code.visualstudio.com)
 - [Node.js 20](https://nodejs.org/en/download/package-manager)
+- A node package manager (E.g.: npm, yarn)
+- A BOCA API (tested with [this one](https://github.com/leodeorce/boca-api))
 
-Open your repository with VS Code, open `src/extension.ts`, and simply run the debugging tool. Either by pressing `F5` or running the command `Debug: Start Debugging` from the Command Pallette.
+#### Steps
+
+1. Clone this repository (or fork it and then clone your forked repo)
+2. Install node packages with your prefered package manager. E.g.:
+```sh
+npm install
+# or
+yarn install
+```
+3. Open the repository with VS Code
+4. Open `src/extension.ts`
+5. Run the debugging tool. Either by pressing `F5` or running the command `Debug: Start Debugging` from the Command Pallette.
+
 
 <details>
 <summary>
@@ -142,6 +156,39 @@ Command Pallette option
 
 ![image](https://github.com/user-attachments/assets/2b46e097-f470-4555-bc3f-0a2eaeb75095)
 </details>
+
+#### How to run a BOCA API:
+
+##### Requirements
+
+- [Docker](https://www.docker.com)
+
+Run this command in your terminal:
+```sh
+# this will start every service of docker-compose.yaml
+docker compose up -d
+```
+The uri port and the salt of the API will be at the configuration of the service `boca-api`:
+```yaml
+services:
+  boca-api:
+    image: renatommachado/boca-api:2.0.0
+    ...
+    ports:
+      - "3000:3000" # the one on the left is the one used by the extension
+    environment:
+      - LISTEN_PORT=3000
+      - TOKEN_EXPIRES_IN_SECONDS=1800 # one day
+      - PASSWORD_SALT=v512nj18986j8t9u1puqa2p9mh # salt used by the extension
+      ...
+```
+To use the extension with this API configuration, you have to set the extension configuration like this:
+```json
+{
+  "boca.api.uri": "http://localhost:3000/api",
+  "boca.api.salt": "v512nj18986j8t9u1puqa2p9mh"
+}
+```
 
 ## License
 
