@@ -28,18 +28,18 @@ The BOCA Online Contest Administrator, commonly referred to as BOCA, is a robust
 BOCA represents a powerful tool for streamlining the administration of programming contests, making it a valuable asset for contest organizers and participants.
 For more in-depth information, please visit the official repository at [https://github.com/cassiopc/boca](https://github.com/cassiopc/boca).
 
-The system's main users are the admins and the teams. An admin is responsible to create a contest and its problems. A team can join a contest, view/download its problems, submit a file for run and view the runs alongside with its files.
+The system's main users are the admins and the teams. An admin is responsible for creating a contest and its problems. A team can join a contest, view/download its problems, submit a file for run and view the runs alongside its files.
 
 ## Features
 
-The BOCA VS Code extension aims to simplify the use of BOCA system by teams. With it they can:
+The BOCA VS Code extension aims to simplify the use of the BOCA  system by teams. With it, they can:
 
-- View the contests they are participating;
-- View the problems and download its file(s);
+- View the contests in which they are participating;
+- View the problems and download their file(s);
 - Submit a file for run;
 - View the runs and also open the files submitted for it.
 
-As a result, the extension reduces the need of a team to be switching between applications in order to use BOCA system.
+As a result, the extension reduces the need for a team to switch between applications in order to use the BOCA system.
 
 This work started as part of the undergraduate final year project carried out by Renato Menezes Machado under supervision of Prof. Dr. Rodrigo Laiola Guimarães at Universidade Federal do Espirito Santo ([UFES](https://www.ufes.br/)).
 
@@ -51,7 +51,7 @@ As it was explained before, the extension is developed for [Visual Studio Code](
 
 ### Option 1
 
-You can install it by searching for "BOCA" at the marketplace, either at the editor's extensions view or at the [website](https://marketplace.visualstudio.com/items?itemName=ardoboehme.boca). Once you find it you just hit the "Install" button.
+You can install it by searching for "BOCA" at the marketplace, either at the editor's extensions view or at the [website](https://marketplace.visualstudio.com/items?itemName=ardoboehme.boca). Once you find it, you just hit the "Install" button.
 
 <details>
 <summary>
@@ -103,7 +103,7 @@ And finally choose the downloaded file.
 
 ## Configuration
 
-After the extension is installed you must set these two configuration options in order for it to properly connect to a BOCA system. 
+After the extension is installed, you must set these two configuration options in order for it to properly connect to a BOCA system. 
 
 | Name | Default Value | Example | Description |
 |---|---|---|---|
@@ -137,7 +137,7 @@ The easiest way to test the extension is by running it in debug mode.
 #### Steps
 
 1. Clone this repository (or fork it and then clone your forked repo)
-2. Install node packages with your prefered package manager. E.g.:
+2. Install node packages with your favorite package manager. E.g.:
 ```sh
 npm install
 # or
@@ -145,7 +145,7 @@ yarn install
 ```
 3. Open the repository with VS Code
 4. Open `src/extension.ts`
-5. Run the debugging tool. Either by pressing `F5` or running the command `Debug: Start Debugging` from the Command Pallette.
+5. Run the debugging tool. Either by pressing `F5` or by running the command `Debug: Start Debugging` from the Command Pallette.
 
 
 <details>
@@ -164,10 +164,13 @@ Command Pallette option
 - [Docker](https://www.docker.com)
 
 Run this command in your terminal:
+
 ```sh
-# this will start every service of docker-compose.yaml
 docker compose up -d
 ```
+
+The previous command will start every service in `docker-compose.yaml`, including a web version of BOCA that you will be able to access at http://localhost:8000/boca. You can then create and activate a BOCA contest (user: system | password: boca). Then, login as admin (user: admin | password: boca) to manage users, problems, languages, etc.
+
 The uri port and the salt of the API will be at the configuration of the service `boca-api`:
 ```yaml
 services:
