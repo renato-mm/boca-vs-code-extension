@@ -43,6 +43,10 @@ As a result, the extension reduces the need for a team to switch between applica
 
 This work started as part of the undergraduate final year project carried out by Renato Menezes Machado under supervision of Prof. Dr. Rodrigo Laiola Guimarães at Universidade Federal do Espirito Santo ([UFES](https://www.ufes.br/)).
 
+## Usage
+
+https://github.com/user-attachments/assets/e445cd91-2e3d-4cda-94cf-7474acae4d29
+
 ## How To Install The Extension
 
 As it was explained before, the extension is developed for [Visual Studio Code](https://code.visualstudio.com), so in order to use it, you must install it in VS Code.
