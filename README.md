@@ -11,6 +11,7 @@ A Visual Studio Code extension for BOCA's teams.
 
 - [What Is BOCA?](#what-is-boca)
 - [Features](#features)
+- [Usage](#usage)
 - [How To Install The Extension](#how-to-install-the-extension)
   - [Option 1](#option-1)
   - [Option 2](#option-2)
